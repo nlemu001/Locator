@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/aa"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom"
+    android:orientation="vertical" >
+
+    <RelativeLayout
+        android:id="@+id/RelativeLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="322dp"
+        android:background="@drawable/popup_payment_bg"
+        android:columnCount="2"
+        android:orientation="horizontal"
+        android:rowCount="10" >
+
+        <Space
+            android:id="@+id/Space1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_column="1"
+            android:layout_gravity="fill_vertical"
+            android:layout_row="3" />
+
+        <Button
+            android:id="@+id/btnAcceptPlace"
+            android:layout_width="157dp"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="18dp"
+            android:background="@drawable/payment_bottom_bg"
+            android:text="Create Place"
+            android:textColor="@color/gray" />
+
+        <Button
+            android:id="@+id/placeBtnCancel"
+            android:layout_width="152dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/btnAcceptPlace"
+            android:layout_alignBottom="@+id/btnAcceptPlace"
+            android:layout_alignParentRight="true"
+            android:background="@drawable/payment_bottom_bg"
+            android:text="@string/cancel"
+            android:textColor="@color/gray" />
+
+        <TextView
+            android:id="@+id/npTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="26dp"
+            android:text="Create New Place:"
+            android:textColor="@color/black"
+            android:textSize="@dimen/grid_4" />
+
+        <TextView
+            android:id="@+id/cityTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/btnAcceptPlace"
+            android:layout_alignParentLeft="true"
+            android:layout_marginBottom="18dp"
+            android:text="City, State: "
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/theme_black" />
+
+        <EditText
+            android:id="@+id/cityET"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/cityTV"
+            android:layout_alignBottom="@+id/cityTV"
+            android:layout_marginLeft="17dp"
+            android:layout_toRightOf="@+id/newPlaceTV"
+            android:ems="10"
+            android:hint="i.e. Riverside, CA "
+            android:inputType="textPostalAddress" >
+
+            <requestFocus />
+        </EditText>
+
+        <TextView
+            android:id="@+id/newPlaceTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/npTV"
+            android:layout_marginTop="37dp"
+            android:layout_toLeftOf="@+id/placeAddress"
+            android:text="Place Name: "
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/theme_black" />
+
+        <EditText
+            android:id="@+id/placeAddress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:ems="10"
+            android:hint="i.e. 900 University Ave."
+            android:inputType="textPostalAddress" />
+
+        <TextView
+            android:id="@+id/newAddressTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/placeAddress"
+            android:layout_alignBottom="@+id/placeAddress"
+            android:layout_alignParentLeft="true"
+            android:text="Address: "
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="@color/theme_black" />
+
+        <EditText
+            android:id="@+id/newPlaceName"
+            android:layout_width="182dp"
+            android:layout_height="wrap_content"
+            android:layout_alignBaseline="@+id/newPlaceTV"
+            android:layout_alignBottom="@+id/newPlaceTV"
+            android:layout_alignParentRight="true"
+            android:ems="10"
+            android:hint="i.e. Home" />
+
+    </RelativeLayout>
+
+</LinearLayout>

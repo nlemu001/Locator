@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="javadoc">
+    <target name="javadoc">
+        <javadoc access="private" author="true" classpath="" destdir="doc" nodeprecated="false" nodeprecatedlist="false" noindex="false" nonavbar="false" notree="false" packagenames="eu.inmite.android.lib.dialogs,com.taxi.ui,com.taxi.model,com.google.android.gms,com.taxi.custom,com.taxi.utils,com.taxi" source="1.6" sourcepath="src;gen" splitindex="true" use="true" version="true"/>
+    </target>
+</project>

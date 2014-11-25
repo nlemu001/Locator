@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/aa"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="bottom"
+    android:orientation="vertical" >
+
+    <GridLayout
+        android:id="@+id/GridLayout1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/popup_payment_bg"
+        android:columnCount="2"
+        android:orientation="horizontal"
+        android:rowCount="10" >
+
+        <Space
+            android:layout_column="1"
+            android:layout_gravity="fill_vertical"
+            android:layout_row="3" />
+
+        <Button
+            android:id="@+id/btnAcceptPass"
+            android:layout_width="157dp"
+            android:layout_column="0"
+            android:layout_gravity="left|bottom"
+            android:layout_marginTop="10dp"
+            android:layout_row="9"
+            android:background="@drawable/payment_bottom_bg"
+            android:text="Apply Change"
+            android:textColor="@color/gray" />
+
+        <Button
+            android:id="@+id/btnCancel"
+            android:layout_width="152dp"
+            android:layout_column="0"
+            android:layout_gravity="right|bottom"
+            android:layout_marginTop="10dp"
+            android:layout_row="9"
+            android:background="@drawable/payment_bottom_bg"
+            android:text="@string/cancel"
+            android:textColor="@color/gray" />
+
+        <TextView
+            android:id="@+id/newNnameTV"
+            android:layout_column="0"
+            android:layout_gravity="left|center_vertical"
+            android:layout_row="9"
+            android:textColor="@color/theme_black"
+            android:text="New Password: "
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <EditText
+            android:id="@+id/newPass"
+            android:layout_width="182dp"
+            android:layout_column="0"
+            android:layout_gravity="right|center_vertical"
+            android:layout_row="9"
+            android:ems="10" >
+
+            <requestFocus />
+        </EditText>
+
+    </GridLayout>
+
+</LinearLayout>

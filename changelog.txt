@@ -1,0 +1,10 @@
+Sunday November 23, 2014 Changelog
+
+- Added private class to MainActivity.java which refreshes your circles.
+- Added code to CirclesActivity.java that will return the user to the map after creating a new circle.
+- ^^ Chris further modified these
+- Added functionality to update phone number: AndroidManifest.xml, ProfileActivity.java, profile_activity.xml, 
+	NewPhonePopup.java, new_phone_popup.xml	
+- Changed left drawer icons in MainActivity.java (replace setupLeftDrawer)
+
+- Added files for Favorite Places: Places.java, NewPlacePopup.java, places.xml, new_places_popup.xml

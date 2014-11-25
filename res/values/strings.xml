@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Family Locator</string>
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+    <string name="search">Search</string>
+
+    <string name="online_taxi_driver">Online Taxi Drivers</string>
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="cash">Cash</string>
+    <string name="card">Card</string>
+    <string name="account">Account</string>
+    <string name="cancel">Cancel</string>
+    <string name="reserve">Reserve</string>
+    <string name="call">Call</string>
+    <string name="receipt">Receipt</string>
+    <string name="home">Home</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="normal">Normal</string>
+    <string name="sattelite">Satellite</string>
+    <string name="hybrid">Hybrid</string>
+    <string name="terrain">Terrain</string>
+    <string name="none">None</string>
+    <string name="action_settings">Settings</string>
+    <string name="current_location">Current Location</string>
+    <string name="profile">Profile</string>
+    <string name="resume">Resume</string>
+    <string name="refresh">Refresh</string>
+    <string name="refreshing">Refreshing..</string>
+    <string name="canceled">Canceled</string>
+    <string name="finished">Finished</string>
+    <string name="size">Size</string>
+    <string name="key">Key</string>
+    <string name="open">Open</string>
+    <string name="update_password">Update Password</string>
+    <string name="update_nickname">Update nickname</string>
+    <string name="upload_photo">Upload Photo</string>
+    <string name="nickname_">"Nickname: "</string>
+    <string name="profile_image">profile image</string>
+    <string name="nickname_str">"Nickname: "</string>
+    <string name="name_">"Name: "</string>
+</resources>

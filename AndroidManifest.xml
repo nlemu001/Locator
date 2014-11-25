@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.taxi"
+    android:versionCode="1"
+    android:versionName="1.0" >
+
+    <uses-sdk
+        android:minSdkVersion="16"
+        android:targetSdkVersion="21" />
+
+    <!-- Maps API permissions -->
+    <permission
+        android:name="com.taxi.permission.MAPS_RECEIVE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.SEND_SMS"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <uses-permission android:name="com.google.android.providers.gsf.permission.READ_GSERVICES" />
+    <uses-permission android:name="com.taxi.permission.MAPS_RECEIVE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
+    <!-- Maps API OpenGL ES 2.0. -->
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+    <uses-feature
+        android:glEsVersion="0x00020000"
+        android:required="true" />
+
+    <application
+        android:name="com.taxi.Member"
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme" >
+        
+        <activity
+            android:name=".UserLogin"
+            android:label="@string/title_activity_user_login"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+<!--         <activity -->
+<!--             android:name=".LoginActivity" -->
+<!--             android:label="@string/title_activity_login" -->
+<!--             android:windowSoftInputMode="adjustResize|stateHidden" > -->
+<!--         </activity> -->
+        <activity
+            android:name=".MainActivity"
+            android:label="@string/app_name"
+            android:screenOrientation="portrait" >
+        </activity>
+        
+        <activity
+        android:name="com.taxi.MessageActivity"
+        android:label="@string/profile"
+        android:parentActivityName="com.taxi.MainActivity" >
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="com.taxi.MainActivity" />
+    	</activity>
+    	
+        
+        <activity
+        	android:name="com.taxi.CirclesActivity"
+        	android:parentActivityName="com.taxi.MainActivity" >
+        	<meta-data
+            	android:name="android.support.PARENT_ACTIVITY"
+            	android:value="com.taxi.CirclesActivity" />
+    	</activity>
+    
+		<activity
+	        android:name="com.taxi.CreateCircle"
+	        android:parentActivityName="com.taxi.CirclesActivity" >
+	        <meta-data
+	            android:name="android.support.PARENT_ACTIVITY"
+	            android:value="com.taxi.CirclesActivity" />
+	    </activity>
+
+		<activity
+        	android:name="com.taxi.CircleMembers"
+        	android:parentActivityName="com.taxi.CirclesActivity" >
+        	<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+           	 	android:value="com.taxi.CircleMembers" /> 
+        </activity>
+        
+		<activity
+        	android:name="com.taxi.CircleAddMember"
+        	android:parentActivityName="com.taxi.CirclesActivity" >
+        	<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+           	 	android:value="com.taxi.CircleMembers" /> 
+        </activity>
+        
+		<activity
+        	android:name="com.taxi.CircleRemoveMember"
+        	android:parentActivityName="com.taxi.CirclesActivity" >
+        	<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+           	 	android:value="com.taxi.CircleMembers" /> 
+        </activity>
+		
+        
+        <activity
+            android:name=".ProfileActivity"
+            android:label="@string/profile"
+            android:parentActivityName=".MainActivity" >
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.taxi.MainActivity" />
+        </activity>
+        
+        <activity
+            android:name=".PaymentPopup"
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.CustomDialog"
+            android:windowSoftInputMode="stateHidden" >
+        </activity>
+        
+        <activity
+            android:name=".CreateNewAccountActivity"
+            android:label="@string/title_activity_create_new_account"
+            android:windowSoftInputMode="adjustResize|stateVisible" >
+        </activity>
+
+        <activity
+        	android:name=".NewPassPopup"
+        	android:screenOrientation="portrait"
+        	android:theme="@style/Theme.CustomDialog"
+        	android:windowSoftInputMode="stateHidden" >
+    	</activity>
+    	
+        <activity
+        	android:name=".Places"
+        	android:screenOrientation="portrait"
+        	android:windowSoftInputMode="stateHidden" >
+    	</activity>
+   	 
+    	<activity
+        	android:name=".NewNnamePopup"
+        	android:screenOrientation="portrait"
+        	android:theme="@style/Theme.CustomDialog"
+        	android:windowSoftInputMode="stateHidden" >
+    	</activity>
+    	
+    	<activity
+        	android:name=".NewPlacePopup"
+        	android:screenOrientation="portrait"
+        	android:theme="@style/Theme.CustomDialog"
+        	android:windowSoftInputMode="stateHidden" >
+    	</activity>
+    	
+    	<activity
+        	android:name=".NewPhonePopup"
+        	android:screenOrientation="portrait"
+        	android:theme="@style/Theme.CustomDialog"
+        	android:windowSoftInputMode="stateHidden" >
+    	</activity>
+        
+        <service
+            android:name=".NetworkService"
+            android:exported="false" />
+
+        <!-- Google Play services -->
+        <meta-data
+            android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+
+        <!-- Maps API key RISHI-->
+<!--         <meta-data
+            android:name="com.google.android.maps.v2.API_KEY"
+            android:value="AIzaSyC32QZemxnVpdXRacqo69k6XEcPGiT-Y5g" /> -->
+        
+         <!-- Maps API key JOE-->
+<!--         <meta-data -->
+<!--             android:name="com.google.android.maps.v2.API_KEY" -->
+<!--             android:value="AIzaSyAStuEgshN6VElKcYjJeADKIBTTLw-oK5Mg" /> -->
+        
+         <!-- Maps API key JORDAN-->
+<!--         <meta-data -->
+<!--             android:name="com.google.android.maps.v2.API_KEY" -->
+<!--             android:value="AIzaSyBlKR_rG<ADD DASH DASH HERE>IROcr8K3rxWmZhR9OQi4a8KQ" /> -->
+        
+         <!-- Maps API key NERI-->
+         <meta-data
+             android:name="com.google.android.maps.v2.API_KEY"
+             android:value="AIzaSyA_bCTpUDoaJ2oDIvXlRSuLTgbmNe6PZ1s" />
+        
+         <!-- Maps API key CHRISTIAN-->
+<!--         <meta-data -->
+<!--             android:name="com.google.android.maps.v2.API_KEY" -->
+<!--             android:value="AIzaSyB_wp_ErF74JpZpT6quA1819hKFKb94f_Q" /> -->
+
+    </application>
+
+    <!--
+     To retrieve OAuth 2.0 tokens or invalidate tokens to disconnect a user. This disconnect
+     option is required to comply with the Google+ Sign-In developer policies
+    -->
+    <uses-permission android:name="android.permission.USE_CREDENTIALS" />
+
+    <!-- To retrieve the account name (email) as part of sign-in: -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+
+    <!-- To auto-complete the email text field in the login form with the user's emails -->
+    <uses-permission android:name="android.permission.READ_PROFILE" />
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+
+</manifest>

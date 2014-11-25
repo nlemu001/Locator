@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout android:layout_width="wrap_content"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="match_parent">
+    
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:contentDescription="@string/profile_image"
+        android:src="@drawable/default_picture" />
+    
+    <Button
+        android:id="@+id/browse"
+        android:layout_width="154dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignTop="@+id/updatePass"
+        android:text="@string/upload_photo" />
+
+    <Button
+        android:id="@+id/updateNickname"
+        android:layout_width="153dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/updatePass"
+        android:layout_marginTop="19dp"
+        android:text="@string/update_nickname" />
+
+	 <TextView
+	     android:id="@+id/textView2"
+	     android:layout_width="wrap_content"
+	     android:layout_height="wrap_content"
+	     android:layout_alignParentLeft="true"
+	     android:layout_alignParentTop="true"
+	     android:layout_marginLeft="17dp"
+	     android:layout_marginTop="18dp"
+	     android:text="@string/name_" />
+
+	 <TextView
+	     android:id="@+id/textView3"
+	     android:layout_width="wrap_content"
+	     android:layout_height="wrap_content"
+	     android:layout_alignLeft="@+id/textView2"
+	     android:layout_below="@+id/textView2"
+	     android:text="@string/nickname_str" />
+
+	 <Button
+	     android:id="@+id/updatePass"
+	     android:layout_width="153dp"
+	     android:layout_height="wrap_content"
+	     android:layout_alignParentLeft="true"
+	     android:layout_below="@+id/imageView1"
+	     android:layout_marginTop="51dp"
+	     android:text="@string/update_password" />
+
+	 <TextView
+	     android:id="@+id/phonetextview"
+	     android:layout_width="wrap_content"
+	     android:layout_height="wrap_content"
+	     android:layout_alignLeft="@+id/textView3"
+	     android:layout_below="@+id/textView3"
+	     android:text="No phone #" />
+
+	 <Button
+	     android:id="@+id/phoneButton"
+	     android:layout_width="wrap_content"
+	     android:layout_height="wrap_content"
+	     android:layout_alignLeft="@+id/browse"
+	     android:layout_alignTop="@+id/updateNickname"
+	     android:text="Update Phone Number" />
+	 
+</RelativeLayout>

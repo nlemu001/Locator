@@ -1,0 +1,10 @@
+<resources>
+
+    <string name="title_activity_create_new_account">New Account</string>
+
+
+    <!-- Strings related to login -->
+    <string name="test_create_new_acocunt">THIS WILL BE THE NEW USER PAGE</string>
+    
+
+</resources>
