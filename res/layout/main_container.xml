@@ -23,20 +23,21 @@
         android:paddingLeft="20dp"
         android:paddingRight="20dp"
         android:paddingTop="10dp" >
-
-            <TextView
-                android:id="@+id/btnSearch"
+        
+        	<TextView
+                android:id="@+id/btnPlaces"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/ic_search"
+                android:layout_alignParentLeft="true"
+                android:background="@drawable/ic_left4"
                 android:clickable="true" />
-
+        	
             <TextView
-                android:id="@+id/btnCall"
+                android:id="@+id/btnLoc"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/ic_call"
+                android:background="@drawable/ic_locate"
                 android:clickable="true" />
         </RelativeLayout>
 
@@ -50,8 +51,5 @@
             android:clickable="true" 
             android:layout_marginBottom="10dp"/>
 
-        
-
-        
 
 </RelativeLayout>

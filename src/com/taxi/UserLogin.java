@@ -4,19 +4,20 @@ import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.List;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import com.parse.FindCallback;
+import com.parse.GetCallback;
+import com.parse.Parse;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.LogInCallback;
+import com.parse.ParseException;
+import com.parse.ParseUser;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
@@ -27,7 +28,8 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
-
+import android.widget.TextView;
+import android.widget.Toast;
 
 public class UserLogin extends Activity implements OnClickListener
 {
@@ -40,49 +42,57 @@ public class UserLogin extends Activity implements OnClickListener
 	String phoneFromLogin;
 	View focusView = null;
 	Boolean cancel = false;
-	Boolean dbcontentdoesntmatch = false;	
-	Member currentMember;
-
+	Boolean dbcontentdoesntmatch = false;
+	Integer count = 0;
+	
+	Member currentMember = new Member();
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
+		
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_user_login);
-
+		
 		signIn = (Button) findViewById(R.id.signIN);
 		newAccount = (Button) findViewById(R.id.newACCOUNT);
-
+		
 		usernameField = (EditText) findViewById(R.id.usernameFIELD);
 		passwordField = (EditText) findViewById(R.id.passwordFIELD);
-		currentMember = ((Member) this.getApplication());
+		
 		signIn.setOnClickListener(this);
-		newAccount.setOnClickListener(new OnClickListener() {
+		newAccount.setOnClickListener(new OnClickListener() 
+		{
 			@Override
 			public void onClick(View v) 
-			{				
+			{
 				Intent createNewAccountIntent = new Intent(UserLogin.this, CreateNewAccountActivity.class);
 				startActivity(createNewAccountIntent);
 			}
 		});
-
-
 	}
-
-	public void login () {
-		currentMember.setID(idFromLogin);
-		currentMember.setNickname (nicknameFromLogin);
-		currentMember.setUsername (usernameField.getText ().toString ());
-		currentMember.setPassword (passwordField.getText ().toString ());
-		currentMember.setPhoneNumber (phoneFromLogin);
-		Intent intent = new Intent (this, MainActivity.class);
-		startActivity (intent);
-		finish ();
+	
+	public void login()
+	{
+		final Context context = this;
+		
+		((Member) this.getApplication()).nickname = nicknameFromLogin;
+		((Member) this.getApplication()).email = usernameField.getText().toString();
+		((Member) this.getApplication()).password = passwordField.getText().toString();
+		((Member) this.getApplication()).phone_num = phoneFromLogin;
+		((Member) this.getApplication()).ID = idFromLogin;
+		
+		Intent intent = new Intent(this, MainActivity.class);
+		startActivity(intent);
+		finish();
 	}
-
-	public void createNewAccount () {
+	
+	public void createNewAccount()
+	{
 		Intent createNewAccountIntent = new Intent(UserLogin.this, CreateNewAccountActivity.class);
 		startActivity(createNewAccountIntent);
 	}
-
+	
 	public Boolean isEmailValid(String usernameEntry)
 	{
 		if(usernameEntry.isEmpty()) 
@@ -92,7 +102,7 @@ public class UserLogin extends Activity implements OnClickListener
 			focusView.requestFocus();
 			return false;
 		}
-
+		
 		if(usernameEntry.contains("@") && !usernameEntry.contains(" ") && (usernameEntry.contains(".com") || usernameEntry.contains(".edu")))//also .net, .edu, .org
 		{
 			return true;
@@ -105,7 +115,7 @@ public class UserLogin extends Activity implements OnClickListener
 			return false;
 		}
 	}
-
+	
 	public Boolean isPasswordValid(String password)
 	{
 		if(password.isEmpty())
@@ -120,125 +130,48 @@ public class UserLogin extends Activity implements OnClickListener
 			return true;
 		}
 	}
-
-	class LogInTask extends AsyncTask<String, String, Void> {
-		private ProgressDialog progressDialog = new ProgressDialog(UserLogin.this);
-		InputStream is = null ;
-		String result = "";
-		protected void onPreExecute() {
-			progressDialog.setMessage("Logging In");
-			progressDialog.show();
-			progressDialog.setOnCancelListener(new OnCancelListener() {
-				@Override
-				public void onCancel(DialogInterface arg0) 
-				{
-					LogInTask.this.cancel(true);
-				}
-			});
-		}
-
-		@Override
-		protected Void doInBackground(String... params) {
-			String url_select = "http://rishinaik.com/familyLocator/dbaccess.php";
-
-			HttpClient httpClient = new DefaultHttpClient();
-			HttpPost httpPost = new HttpPost(url_select);
-
-			ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
-
-			try {
-				httpPost.setEntity(new UrlEncodedFormEntity(param));
-
-				HttpResponse httpResponse = httpClient.execute(httpPost);
-				HttpEntity httpEntity = httpResponse.getEntity();
-
-				//read content
-				is =  httpEntity.getContent();					
-
-			} 
-			catch (Exception e) {
-				Log.e("log_tag", "Error in http connection "+e.toString());
-			}
-
-			try {
-				BufferedReader br = new BufferedReader(new InputStreamReader(is));
-				StringBuilder sb = new StringBuilder();
-				String line = "";
-				while((line=br.readLine())!=null) {
-					sb.append(line+"\n");
-				}
-
-				is.close();
-				result=sb.toString();				
-
-			}
-			catch (Exception e) 
-			{
-				Log.e("log_tag", "Error converting result "+e.toString());
-			}
-			return null;
-		}
-
-
-		protected void onPostExecute(Void v) {
-			try  {
-				JSONArray Jarray = new JSONArray(result);
-				for(int i=0;i<Jarray.length();i++) {
-					JSONObject Jasonobject = null;
-					Jasonobject = Jarray.getJSONObject(i);
-
-					String DBusername = Jasonobject.getString("username");
-					String DBpassword = Jasonobject.getString("password");
-					idFromLogin = Integer.parseInt(Jasonobject.getString("uid"));
-					nicknameFromLogin = Jasonobject.getString("nickname");
-					phoneFromLogin = Jasonobject.getString("phone");
-
-					if((isEmailValid(usernameField.getText().toString())) && isPasswordValid(passwordField.getText().toString())) {
-						cancel = false;
-					} else {
-						cancel = true;
-					}
-
-
-					if(usernameField.getText().toString().equalsIgnoreCase(DBusername) && 
-							passwordField.getText().toString().equalsIgnoreCase(DBpassword)) 
-					{
-						dbcontentdoesntmatch = false;
-						login();	
-						break;
-					} else {
-						dbcontentdoesntmatch = true;
-					}
-				}
-			} 
-			catch (Exception e) {
-				Log.e("log_tag", "Error parsing data "+e.toString());
-			}
-
-			this.progressDialog.dismiss();
-			if(dbcontentdoesntmatch && isPasswordValid(passwordField.getText().toString())) {
-				passwordField.setError(getString(R.string.error_userpass_incorrect));
-				focusView = passwordField;
-				focusView.requestFocus();
-			}	
-		}
-	}
-
+		    
 	@Override
 	public void onClick(View v) 
 	{
+		// TODO Auto-generated method stub
 		switch(v.getId()) 
 		{
-		case R.id.signIN:
-		{
-			try {
-				new LogInTask().execute();
-			} catch (Exception e) {
-				e.printStackTrace();
+			case R.id.signIN:
+			{
+				ParseQuery<ParseObject> query = ParseQuery.getQuery("users");
+				query.whereEqualTo("username", usernameField.getText().toString());
+				query.whereEqualTo("password", passwordField.getText().toString());
+				query.findInBackground(new FindCallback<ParseObject>() 
+				{
+				    public void done(List<ParseObject> usersList, ParseException e) 
+				    {
+				        if (e != null) {
+				        	//ERROR
+				        	Log.d("score", "Error: " + e.getMessage());
+				        }
+				        if(usersList.size() == 0)
+				        {
+				        	Log.d("score", "SADNESS");
+					        dbcontentdoesntmatch = true;
+					        passwordField.setError(getString(R.string.error_userpass_incorrect));
+							focusView = passwordField;
+							focusView.requestFocus();
+				        }
+				        else
+				        {
+				        	Log.d("score", "FOUND");
+				        	nicknameFromLogin = usersList.get(0).getString("nickname");
+				        	phoneFromLogin = usersList.get(0).getString("phone");
+				        	idFromLogin = usersList.get(0).getInt("uid");
+				        	Log.d("USERID", "USERID: " + idFromLogin);
+			        		dbcontentdoesntmatch = false;
+							login();
+				        }
+				    }
+				});
+				break;
 			}
-			break;
 		}
-		}
-
 	}
 }

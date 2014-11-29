@@ -40,7 +40,7 @@ public class PlaceRowAdapter extends ArrayAdapter<Place> {
             labelView.setText(itemsArrayList.get(position).getName());
             valueView.setText(itemsArrayList.get(position).getAddress());
  
-            // 5. retrn rowView
+            // 5. return rowView
             return rowView;
         }
 }

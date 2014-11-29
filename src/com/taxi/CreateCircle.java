@@ -2,34 +2,30 @@ package com.taxi;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.DialogInterface.OnCancelListener;
-import android.os.AsyncTask;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
+
+import com.parse.FindCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+import com.parse.ParseQueryAdapter;
 
 public class CreateCircle extends Activity 
 {
@@ -39,245 +35,142 @@ public class CreateCircle extends Activity
 	Button button;
 	String currentUID;
 	String circleName1;
-	JSONParser jsonParser = new JSONParser ();
+	//JSONParser jsonParser = new JSONParser ();
 	Context context;
 	Member currentMember;
-	ArrayList <String> nicknames;
 	ListView listview;
 	String[] nicknameList;
 	ArrayList<String> selectedNames;
-	Map<String, String> contacts;
+	//Map<String, String> contacts;
 	
 	ArrayList<String> keys;
 	ArrayList<String> values;
 	
+	//private ParseQueryAdapter<ParseObject> mainAdapter;
+	private AdapterAllUsersButAdmin adminAdapter;
+	
 	protected void onCreate(Bundle savedInstanceState)
 	{
+		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.circle_create);
 		currentMember = ((Member) this.getApplication());
 		context = this;
 		circleName = (EditText)findViewById(R.id.editText1);
 		listview = (ListView)findViewById(R.id.usersList);
-		nicknames = new ArrayList <String> ();
 		selectedNames = new ArrayList <String>();
-		contacts = new HashMap<String, String>();
+		//contacts = new HashMap<String, String>();
 		keys = new ArrayList<String> ();
 		values = new ArrayList<String> ();
 		
-		try {
-			new GetNamesTask().execute ().get(2000, TimeUnit.MILLISECONDS);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (ExecutionException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (TimeoutException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Log.d("new circle", "inside create new circle");
+		ParseQuery<ParseObject> query = ParseQuery.getQuery("users");
+		query.whereNotEqualTo("uid", currentMember.getID());
+		query.findInBackground(new FindCallback<ParseObject>() 
+		{
+		    public void done(List<ParseObject> usersList, ParseException e) 
+		    {
+		        if (e != null) {
+		        	//ERROR
+		        	Log.d("Userlist", "Error: " + e.getMessage());
+		        }
+		        else
+		        {
+		        	for(int i = 0; i < usersList.size(); ++i)
+			        {
+		        		String id = String.valueOf(usersList.get(i).getInt("uid"));
+			        	String n = usersList.get(i).getString("nickname");
+
+						keys.add(id);
+						values.add(n);
+			        }
+		        	usersToList();
+		        }
+			}
+		});
+		addListenerOnButton();
+	}
+	
+	public void usersToList()
+	{
+		 ParseQueryAdapter.QueryFactory<ParseObject> factory =
+			     new ParseQueryAdapter.QueryFactory<ParseObject>() {
+			       public ParseQuery create() {
+			         ParseQuery query = new ParseQuery("users");
+			         query.whereNotEqualTo("uid", currentMember.getID());
+			         return query;
+			       }
+			     };
+		ParseQueryAdapter<ParseObject> mainAdapter = new ParseQueryAdapter<ParseObject>(this, factory);
+		mainAdapter.setTextKey("nickname");
+		
+		//mainAdapter = new ParseQueryAdapter<ParseObject>(this, "users");
+		//mainAdapter.setTextKey("nickname");
+		//mainAdapter.setImageKey("image");
+		
+		//adminAdapter = new AdapterAllUsersButAdmin(this);
+		//listview.setAdapter(mainAdapter);
+		listview.setAdapter(mainAdapter);
 		
 		String cuid = currentMember.getID().toString();
-		for (Map.Entry<String, String> entry : contacts.entrySet()) {
-		    String key = entry.getKey();
-		    String value = entry.getValue();
-		    if(!key.equals(cuid)){
-		    	Log.d("adding mem", key);
-		    	keys.add(key);
-		    	values.add(value);
-		    }
-		}
-		
-		nicknameList = values.toArray(new String[0]);
-		
-		ArrayAdapter <String> adapter = new ArrayAdapter<String>(this,
-				android.R.layout.simple_list_item_activated_1, nicknameList);
-		
-		listview.setAdapter(adapter);
-		
+	
 		listview.setOnItemClickListener(new OnItemClickListener() {
 
 			@Override
 			public void onItemClick(AdapterView<?> l, View v, int pos, long id)
 			{
-				String itemVal = (String) listview.getItemAtPosition(pos);
-				//listview.setItemChecked(pos, true);
-				if(selectedNames.indexOf(keys.get(pos)) == -1)
+				if(selectedNames.indexOf(keys.get(pos)) == -1) //If it is not found in the list then add and select
 				{
 					listview.setItemChecked(pos, true);
-					//listview.setBackgroundColor(Color.YELLOW);
-					selectedNames.add(keys.get(pos));
+					selectedNames.add(keys.get(pos));//This is the issue
+					Toast toast = Toast.makeText(context, "Adding " + 
+							values.get(pos) + " to " + circleName.getText().toString(), Toast.LENGTH_SHORT);
+					toast.show();
 				}
-				else
+				else //found in list already so remove it
 				{
 					listview.setItemChecked(pos, false);
-					//listview.setBackgroundColor(Color.WHITE);
 					selectedNames.remove(keys.get(pos));
+					Toast toast = Toast.makeText(context, "Removing " + 
+							values.get(pos) + " from " + circleName.getText().toString(), Toast.LENGTH_SHORT);
+					toast.show();
 				}
-				Toast.makeText(getApplicationContext(),
-						"Position: " + pos + " Name: " + itemVal,
-						Toast.LENGTH_SHORT).show();
 			}
 		});
-		
-		addListenerOnButton();
-		
 	}
 	
 	public void addListenerOnButton()
 	{
-	
-		//final Context context = this;
-		
 		button = (Button)findViewById(R.id.create_circle_btn);
 		button.setOnClickListener(new OnClickListener() 
 		{
 			@Override
 			public void onClick(View v) {
-				// TODO Auto-generated method stub
-				//Create Circle
 				for(int j = 0; j < selectedNames.size(); j++)
 					Log.d("selected Names", selectedNames.get(j));
 				
-				currentUID = currentMember.getID().toString();
-				circleName1 = circleName.getText().toString();
-				Toast.makeText(getApplicationContext(),  circleName1 + " Circle Created", Toast.LENGTH_LONG).show();
-				try {
-					new CreateDB ().execute().get(2500, TimeUnit.MILLISECONDS);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (ExecutionException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (TimeoutException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+				Toast.makeText(getApplicationContext(),  circleName.getText().toString() + " Circle Created", Toast.LENGTH_LONG).show();
+				addCircleToDatabase();
+				Intent createNewAccountIntent = new Intent(CreateCircle.this, CirclesActivity.class);
+				startActivity(createNewAccountIntent);
 				finish();
 			}
 		});
 	}
-	class CreateDB extends AsyncTask<String, String, String> {
-
-		private ProgressDialog progressDialog = new ProgressDialog(context);
-		private String uid = currentUID; 
-		private String cname = circleName1;
-
-	    protected void onPreExecute() {
-			progressDialog.setMessage("Creating Circle");
-			progressDialog.show();
-			progressDialog.setOnCancelListener(new OnCancelListener() {
-				@Override
-				public void onCancel(DialogInterface arg0) {
-					CreateDB.this.cancel(true);
-				}
-			});
-		}
-	      
-	    @Override
-		protected String doInBackground(String... params) {
-	    	String url_select = "http://rishinaik.com/familyLocator/new_circle.php";
-	    	ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
-
-			for(int i = -1; i < selectedNames.size(); i++)
-			{
-				if(i == -1)
-					param.add (new BasicNameValuePair("nuser", uid));
-				else
-					param.add (new BasicNameValuePair("nuser", selectedNames.get(i)));
-				
-				param.add (new BasicNameValuePair("uid", uid));
-			    param.add (new BasicNameValuePair("cname", cname));
-
-				JSONObject json = jsonParser.makeHttpRequest(url_select, "POST", param);
-				Log.d("Create Response", json.toString());
-				try {
-					int success = json.getInt("success");
-					if (success == 1) {
-						Log.d("JSON", "yeah, niga!");
-					} 
-					else {
-						Log.d("JSON", "you're fucked");
-					}
-				}
-				catch (Exception e) {
-					Log.e("log_tag", "Error in http connection "+e.toString());
-				}
-				param.clear();
-			}
-			if (progressDialog.isShowing()) {
-				progressDialog.dismiss();
-	        }
-			return null;
-		}
-	    
-		protected void onPostExecute(Void v) 	{
-			if (progressDialog.isShowing()) {
-				progressDialog.dismiss();
-	        }
-	    }
-	}
 	
-	class GetNamesTask extends AsyncTask<String, String, String> {
-		JSONParser jParser = new JSONParser ();
-		private ProgressDialog progressDialog = new ProgressDialog (CreateCircle.this);
-		JSONArray users;
-		ArrayList <Integer> list;
-		
-		GetNamesTask() {
-
+	public void addCircleToDatabase()
+	{
+		for(int i = -1; i < selectedNames.size(); ++i)
+		{
+			ParseObject newCircle = new ParseObject("circles");
+			if(i == -1)
+				newCircle.put("members", currentMember.getID().toString());//newPasswordField.getText().toString());
+			else
+				newCircle.put("members", selectedNames.get(i));//newPasswordField.getText().toString());
+			
+			newCircle.put("adminID",currentMember.getID().toString());
+			newCircle.put("cname",  circleName.getText().toString());
+			newCircle.put("shareLocation", 0); //Hardcoded so may need to change
+			newCircle.saveInBackground();
 		}
-		
-	    protected void onPreExecute() {
-			progressDialog.setMessage("Getting users");
-			progressDialog.show();
-			progressDialog.setOnCancelListener(new OnCancelListener() {
-				@Override
-				public void onCancel(DialogInterface arg0) {
-					GetNamesTask.this.cancel(true);
-				}
-			});
-		}       
-
-	    @Override
-		protected String doInBackground(String... params) {
-	    	String url = "http://rishinaik.com/familyLocator/get_users.php";
-	    	ArrayList<NameValuePair> param = new ArrayList<NameValuePair> ();
-	    	
-		    JSONObject json = jParser.makeHttpRequest (url, "GET", param);
-			Log.d ("All Users: ", json.toString ());
-	
-			try {
-				int success = json.getInt ("success");
-				if (success == 1) {
-					users = json.getJSONArray ("users");
-					for (int i = 0; i < users.length (); i++) {
-						JSONObject user = users.getJSONObject (i);						
-						String n = user.getString("nickname");
-						String id = user.getString("uid");
-						Log.d("member", "adding " + n);
-						contacts.put(id, n);
-					}
-					Log.d("JSON", "yeah, niga!");
-				} else {
-					Log.d("JSON", "you're fucked");
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			if (progressDialog.isShowing()) {
-				progressDialog.dismiss();
-	        }
-			return null;
-		}
-	    
-		protected void onPostExecute(Void v) 	{
-			if (progressDialog.isShowing()) {
-				progressDialog.dismiss();
-	        }
-	    }
 	}
 }

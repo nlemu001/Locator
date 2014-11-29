@@ -196,7 +196,7 @@
          <!-- Maps API key NERI-->
          <meta-data
              android:name="com.google.android.maps.v2.API_KEY"
-             android:value="AIzaSyA_bCTpUDoaJ2oDIvXlRSuLTgbmNe6PZ1s" />
+             android:value="AIzaSyCb0FspqksQxk67h-v9v8AdUUMkIiGeg0c" />
         
          <!-- Maps API key CHRISTIAN-->
 <!--         <meta-data -->

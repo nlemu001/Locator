@@ -253,7 +253,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
           @attr name eu.inmite.android.lib.dialogs:buttonBackgroundColorFocused
         */
-        public static final int DialogStyle_buttonBackgroundColorFocused = 8;
+        public static int DialogStyle_buttonBackgroundColorFocused = 8;
         /**
           <p>This symbol is the offset where the {@link eu.inmite.android.lib.dialogs.R.attr#buttonBackgroundColorNormal}
           attribute's value can be found in the {@link #DialogStyle} array.
@@ -265,7 +265,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
           @attr name eu.inmite.android.lib.dialogs:buttonBackgroundColorNormal
         */
-        public static final int DialogStyle_buttonBackgroundColorNormal = 6;
+        public static int DialogStyle_buttonBackgroundColorNormal = 6;
         /**
           <p>This symbol is the offset where the {@link eu.inmite.android.lib.dialogs.R.attr#buttonBackgroundColorPressed}
           attribute's value can be found in the {@link #DialogStyle} array.
@@ -277,7 +277,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
           @attr name eu.inmite.android.lib.dialogs:buttonBackgroundColorPressed
         */
-        public static final int DialogStyle_buttonBackgroundColorPressed = 7;
+        public static int DialogStyle_buttonBackgroundColorPressed = 7;
         /**
           <p>This symbol is the offset where the {@link eu.inmite.android.lib.dialogs.R.attr#buttonSeparatorColor}
           attribute's value can be found in the {@link #DialogStyle} array.
@@ -289,7 +289,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
           @attr name eu.inmite.android.lib.dialogs:buttonSeparatorColor
         */
-        public static final int DialogStyle_buttonSeparatorColor = 5;
+        public static int DialogStyle_buttonSeparatorColor = 5;
         /**
           <p>This symbol is the offset where the {@link eu.inmite.android.lib.dialogs.R.attr#buttonTextColor}
           attribute's value can be found in the {@link #DialogStyle} array.
@@ -301,7 +301,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
           @attr name eu.inmite.android.lib.dialogs:buttonTextColor
         */
-        public static final int DialogStyle_buttonTextColor = 4;
+        public static int DialogStyle_buttonTextColor = 4;
         /**
           <p>This symbol is the offset where the {@link eu.inmite.android.lib.dialogs.R.attr#dialogBackground}
           attribute's value can be found in the {@link #DialogStyle} array.
@@ -311,7 +311,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
           @attr name eu.inmite.android.lib.dialogs:dialogBackground
         */
-        public static final int DialogStyle_dialogBackground = 0;
+        public static int DialogStyle_dialogBackground = 0;
         /**
           <p>This symbol is the offset where the {@link eu.inmite.android.lib.dialogs.R.attr#messageTextColor}
           attribute's value can be found in the {@link #DialogStyle} array.
@@ -323,7 +323,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
           @attr name eu.inmite.android.lib.dialogs:messageTextColor
         */
-        public static final int DialogStyle_messageTextColor = 3;
+        public static int DialogStyle_messageTextColor = 3;
         /**
           <p>This symbol is the offset where the {@link eu.inmite.android.lib.dialogs.R.attr#titleSeparatorColor}
           attribute's value can be found in the {@link #DialogStyle} array.
@@ -335,7 +335,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
           @attr name eu.inmite.android.lib.dialogs:titleSeparatorColor
         */
-        public static final int DialogStyle_titleSeparatorColor = 2;
+        public static int DialogStyle_titleSeparatorColor = 2;
         /**
           <p>This symbol is the offset where the {@link eu.inmite.android.lib.dialogs.R.attr#titleTextColor}
           attribute's value can be found in the {@link #DialogStyle} array.
@@ -347,7 +347,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 "<code>#<i>rrggbb</i></code>", or "<code>#<i>aarrggbb</i></code>".
           @attr name eu.inmite.android.lib.dialogs:titleTextColor
         */
-        public static final int DialogStyle_titleTextColor = 1;
+        public static int DialogStyle_titleTextColor = 1;
         /** Attributes that can be used with a StyledDialogs.
            <p>Includes the following attributes:</p>
            <table>
@@ -374,7 +374,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
           @attr name eu.inmite.android.lib.dialogs:sdlDialogStyle
         */
-        public static final int StyledDialogs_sdlDialogStyle = 0;
+        public static int StyledDialogs_sdlDialogStyle = 0;
         /**
           <p>This symbol is the offset where the {@link eu.inmite.android.lib.dialogs.R.attr#sdlMessageTextStyle}
           attribute's value can be found in the {@link #StyledDialogs} array.
@@ -384,7 +384,7 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
           @attr name eu.inmite.android.lib.dialogs:sdlMessageTextStyle
         */
-        public static final int StyledDialogs_sdlMessageTextStyle = 2;
+        public static int StyledDialogs_sdlMessageTextStyle = 2;
         /**
           <p>This symbol is the offset where the {@link eu.inmite.android.lib.dialogs.R.attr#sdlTitleTextStyle}
           attribute's value can be found in the {@link #StyledDialogs} array.
@@ -394,6 +394,6 @@ or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>na
 or to a theme attribute in the form "<code>?[<i>package</i>:][<i>type</i>:]<i>name</i></code>".
           @attr name eu.inmite.android.lib.dialogs:sdlTitleTextStyle
         */
-        public static final int StyledDialogs_sdlTitleTextStyle = 1;
+        public static int StyledDialogs_sdlTitleTextStyle = 1;
     };
 }
