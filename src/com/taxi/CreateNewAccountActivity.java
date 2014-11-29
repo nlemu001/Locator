@@ -81,12 +81,12 @@ public class CreateNewAccountActivity extends Activity implements OnClickListene
 				        	//ERROR
 				        	Log.d("score", "Error: " + e.getMessage());
 				        }
-				        for(int i = 0; i < usersList.size(); ++i)
-				        {
-				        	if(userID < usersList.get(i).getInt("uid"));
-				        		userID = usersList.get(i).getInt("uid") + 1;
-				        }
-				        //userID = usersList.size() + 1; //THIS IS WRONG IF WE EVER CAN REMOVE A USER
+//				        for(int i = 0; i < usersList.size(); ++i)
+//				        {
+//				        	if(userID < usersList.get(i).getInt("uid"));
+//				        		userID = usersList.get(i).getInt("uid") + 1;
+//				        }
+				        userID = usersList.size() + 1; //THIS IS WRONG IF WE EVER CAN REMOVE A USER
 				        
 				        ParseObject newUser = new ParseObject("users");
 						newUser.put("username", newUsernameField.getText().toString());

@@ -47,7 +47,6 @@ public class CreateCircle extends Activity
 	ArrayList<String> values;
 	
 	//private ParseQueryAdapter<ParseObject> mainAdapter;
-	private AdapterAllUsersButAdmin adminAdapter;
 	
 	protected void onCreate(Bundle savedInstanceState)
 	{
@@ -150,6 +149,7 @@ public class CreateCircle extends Activity
 				
 				Toast.makeText(getApplicationContext(),  circleName.getText().toString() + " Circle Created", Toast.LENGTH_LONG).show();
 				addCircleToDatabase();
+				
 				Intent createNewAccountIntent = new Intent(CreateCircle.this, CirclesActivity.class);
 				startActivity(createNewAccountIntent);
 				finish();
@@ -163,11 +163,11 @@ public class CreateCircle extends Activity
 		{
 			ParseObject newCircle = new ParseObject("circles");
 			if(i == -1)
-				newCircle.put("members", currentMember.getID().toString());//newPasswordField.getText().toString());
+				newCircle.put("membersID", currentMember.getID());//newPasswordField.getText().toString());
 			else
-				newCircle.put("members", selectedNames.get(i));//newPasswordField.getText().toString());
+				newCircle.put("membersID", Integer.parseInt(selectedNames.get(i)));//newPasswordField.getText().toString());
 			
-			newCircle.put("adminID",currentMember.getID().toString());
+			newCircle.put("adminID",currentMember.getID());
 			newCircle.put("cname",  circleName.getText().toString());
 			newCircle.put("shareLocation", 0); //Hardcoded so may need to change
 			newCircle.saveInBackground();
