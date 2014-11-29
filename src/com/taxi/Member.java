@@ -37,6 +37,9 @@ public class Member extends Application {
 		this.phone_num = phone;
 
 	}
+	public HashMap<String, Object> CurrentData () {
+		return display.get (this.ID);
+	}
 	
 	public String IDfromNickname (String nname) {
 		for (Integer key : display.keySet()){
@@ -48,6 +51,11 @@ public class Member extends Application {
 		}
 		Log.d("IDfromNickname", "currentID");
 		return  String.valueOf(ID);
+	}
+	
+	public void updateDisplay (Integer key, Double lat, Double lng) {
+		display.get(key).put("lat", lat);
+		display.get(key).put("lng", lng);
 	}
 	
 	public void addDisplay (Integer key, HashMap<String, Object> value) {

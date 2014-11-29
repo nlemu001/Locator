@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.location.Address;
@@ -15,6 +16,7 @@ import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.parse.Parse;
 import com.parse.ParseObject;
@@ -31,7 +33,7 @@ public class NewPlacePopup extends CustomActivity
 	String placecity = "";
 	Integer ID;
 	Geocoder gc = new Geocoder(this);
-	
+	Context context;
 	Member currentMember;
 	
 	@Override
@@ -39,7 +41,7 @@ public class NewPlacePopup extends CustomActivity
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_place_popup);
-		
+		context = this;
 		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
 		
 		currentMember = ((Member) this.getApplication());
@@ -74,13 +76,20 @@ public class NewPlacePopup extends CustomActivity
 		    	placename = nameET.getText().toString();
 		    	placeaddress = addressET.getText().toString();
 		    	placecity = cityET.getText().toString();
-		    	
+		    	if(placename.equals("") || placeaddress.equals("") || placecity.equals("")){
+		    		Toast.makeText(context, "Fill in all fields!", Toast.LENGTH_SHORT).show();
+		    		finish();
+		    		return;
+		    	}
 				
 				try {
 					List<Address> list = gc.getFromLocationName(placeaddress + placecity, 1);
+					if(list.size() == 0){
+			    		Toast.makeText(context, "Place does not exist!", Toast.LENGTH_SHORT).show();
+			    		finish();
+			    		return;
+			    	}
 					Address add = list.get(0);
-					String locality = add.getLocality();
-					
 					Double lat = add.getLatitude();
 					Double lng = add.getLongitude();
 					Place p = new Place(placename, placeaddress, placecity, ID);

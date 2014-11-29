@@ -22,6 +22,7 @@ import android.content.DialogInterface.OnCancelListener;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
@@ -45,11 +46,18 @@ import com.google.android.gms.maps.GoogleMap.OnInfoWindowClickListener;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.parse.FindCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.taxi.JSONParser;
 import com.taxi.Member;
+import com.taxi.Place;
 import com.taxi.ProfileActivity;
 import com.taxi.R;
 import com.taxi.custom.CustomActivity;
@@ -61,16 +69,20 @@ public class MainFragment extends Fragment implements OnClickListener
 	private GoogleMap mMap;
 	private Context context;
 	private Member currentMember;
-
+	private Double mLat = 0.0;
+	private Double mLng = 0.0;
+	
 	@SuppressLint("InflateParams") @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.main_container, null);
+		context = v.getContext ();
+		Parse.initialize(context, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
+		
 		try {
 			initMap(v, savedInstanceState);
 		} catch (GooglePlayServicesNotAvailableException e) {
 			e.printStackTrace ();
 		}
-		context = v.getContext ();
 		currentMember = ((Member) getActivity().getApplication());
 
 		try{
@@ -78,13 +90,27 @@ public class MainFragment extends Fragment implements OnClickListener
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		
+		try{
+			new GetPlacesDataTask (currentMember.getID()).execute ().get ();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 		initButtons (v);
 		return v;
 	}
 
 	private void initButtons(View v) {
 		View b = v.findViewById(R.id.btnCheckin);
+		b.setOnTouchListener(CustomActivity.TOUCH);
+		b.setOnClickListener(this);
+		
+		b = v.findViewById(R.id.btnLoc);
+		b.setOnTouchListener(CustomActivity.TOUCH);
+		b.setOnClickListener(this);
+		
+		b = v.findViewById(R.id.btnPlaces);
 		b.setOnTouchListener(CustomActivity.TOUCH);
 		b.setOnClickListener(this);
 	}
@@ -104,6 +130,8 @@ public class MainFragment extends Fragment implements OnClickListener
 		if (id.equals (currentMember.getID ())){
 			latitude = (Double) map.get ("lat");
 			longitude = (Double) map.get ("lng");
+			mLat = latitude;
+			mLng = longitude;
 			nname = currentMember.getNickname();
 		} else if (currentMember.inDisplay (id)) {
 			nname = (String) map.get ("nickname");
@@ -262,15 +290,18 @@ public class MainFragment extends Fragment implements OnClickListener
 		}
 		if (mMap != null) {
 			mMap.setInfoWindowAdapter (new CustomInfoWindowAdapter ());
+
+			mMap.clear();
+			currentMember.userNN = currentMember.getNickname();
+
 			try {
-				mMap.clear();
 				String user = currentMember.IDfromNickname(currentMember.userNN);
-				currentMember.userNN = currentMember.getNickname();
 				setupMapMarkers (Integer.valueOf(user));
 			} 
 			catch (IOException e) {
 				e.printStackTrace();
 			}
+			drawPlaces();
 		}
 	}
 
@@ -302,14 +333,20 @@ public class MainFragment extends Fragment implements OnClickListener
 
 	@Override
 	public void onClick(View v) {
-		if (v.getId() == R.id.btnCheckin) {
+		if (v.getId() == R.id.btnPlaces) {
+			drawPlaces();
+		}
+		else if (v.getId() == R.id.btnLoc) {
+			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (new LatLng(mLat, mLng), 18));
+		}
+		else if (v.getId() == R.id.btnCheckin) {
 			try{
 				new GetDisplayDataTask (currentMember.getID ()).execute ().get ();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			mMap.clear();
 			loadMarkers();
+			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (new LatLng(mLat, mLng), 8));
 		}
 	}
 
@@ -380,5 +417,84 @@ public class MainFragment extends Fragment implements OnClickListener
 			}
 		}
 	}
+	
+	private void drawPlaces () {
+		ArrayList<Place> places = currentMember.getPlaces();
+		Log.d("PLACE", String.valueOf(places.size()));
+		Geocoder gc = new Geocoder(context);
+		for (Place p : places) {
+			Double lat =  null;
+			Double lng = null;
+			try {
+				List<Address> list = gc.getFromLocationName(p.getAddress() + p.getCity(), 1);
+				Address add = list.get(0);
+				lat = add.getLatitude();
+				lng = add.getLongitude();
+				p.setLat(lat);
+				p.setLng(lng);
+			} catch (Exception e) {
+				
+			}
+			CircleOptions options = new CircleOptions()
+				.center(new LatLng(lat, lng))
+				.radius(50)
+				.fillColor(0x330000FF)
+				.strokeColor(Color.BLUE)
+				.strokeWidth(3);
+			mMap.addCircle(options);
+			Log.d("PLACE--loop", p.getName()+" at ("+p.getLat()+", "+p.getLng()+")");
+		}
+	}
+	
+	class GetPlacesDataTask extends AsyncTask<String, String, String> {
+		private ProgressDialog progressDialog = new ProgressDialog (context);
+		private Integer UID = null;
+		
+		GetPlacesDataTask (Integer id){
+			this.UID = id;
+		}
 
+		protected void onPreExecute () {
+			progressDialog.setMessage ("Getting data");
+			progressDialog.show ();
+			progressDialog.setOnCancelListener (new OnCancelListener () {
+				@Override
+				public void onCancel (DialogInterface arg0) {
+					GetPlacesDataTask.this.cancel (true);
+				}
+			});
+		}       
+
+		@Override
+		protected String doInBackground (String... params) {			
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("places");
+			query.whereEqualTo("uid", UID);
+			query.findInBackground(new FindCallback<ParseObject>() {
+				public void done(List<ParseObject> placesList, ParseException e) {
+			        if (e != null) {
+			        	Log.d("score", "Error: " + e.getMessage());
+			        }
+			        else{
+			        	currentMember.clearPlaces();
+			        	for (int i = 0; i < placesList.size(); i++) {
+							currentMember.addPlace(placesList.get(i).getString("name"), 
+												   placesList.get(i).getString("street"), 
+												   placesList.get(i).getString("city"));
+						}
+			        }
+			    }
+			});
+
+			if (progressDialog.isShowing ()) {
+				progressDialog.dismiss ();
+			}
+			return null;
+		}
+
+		protected void onPostExecute (Void v) {
+			if (progressDialog.isShowing ()) {
+				progressDialog.dismiss ();
+			}
+		}
+	}
 }

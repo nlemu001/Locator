@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -13,8 +14,12 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.Toast;
+import android.widget.TextView;
 
 import com.parse.FindCallback;
 import com.parse.Parse;
@@ -50,8 +55,7 @@ public class Places extends Activity{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-				
-        final Context context = this;
+		
         final Button newplacebtn = (Button) findViewById(R.id.places_newBtn);
         newplacebtn.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -65,8 +69,48 @@ public class Places extends Activity{
         places = currentMember.getPlaces();
         adapter = new PlaceRowAdapter(this, places);
         listview.setAdapter(adapter);
+        longClick();
 	}
 
+	protected void longClick(){
+		listview.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() 
+		{
+			public boolean onItemLongClick(final AdapterView<?> adapter, final View view, final int pos, final long id)
+			{
+				
+				final CharSequence[] adminChoices = {"Remove Place"};
+				AlertDialog.Builder builder = new AlertDialog.Builder(Places.this);
+				builder.setItems(adminChoices, new DialogInterface.OnClickListener() 
+				{	
+					@Override
+					public void onClick(DialogInterface dialog, final int choice) 	
+					{							
+						if(choice == 0)
+						{
+							String pname = ((TextView)(view.findViewById(R.id.label))).getText().toString();
+							ParseQuery<ParseObject> query = ParseQuery.getQuery("places");
+							query.whereEqualTo("uid", UID);
+							query.whereEqualTo("name", pname);
+							List<ParseObject> placesList;
+							try {
+								placesList = query.find();								
+								places.remove(pos);
+								placesList.get(0).deleteInBackground();
+							} catch (ParseException e1) {
+								e1.printStackTrace();
+							}
+							Toast.makeText(getApplicationContext(), pname + " removed", Toast.LENGTH_SHORT).show();
+							((ArrayAdapter<Place>) listview.getAdapter()).notifyDataSetChanged();
+						}
+					}
+				});
+				AlertDialog alert = builder.create();
+				alert.show();
+				return true;
+			}
+		});
+	}
+	
 	class GetDisplayDataTask extends AsyncTask<String, String, String> {
 		private ProgressDialog progressDialog = new ProgressDialog (context);
 		private Integer UID = null;

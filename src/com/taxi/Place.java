@@ -1,5 +1,7 @@
 package com.taxi;
 
+import android.util.Log;
+
 public class Place {
 
 	private String name;
@@ -48,15 +50,17 @@ public class Place {
 	}
 	
 	public void setLng(Double Lng){
-		lat = Lng.toString();
+		lng = Lng.toString();
 	}
 	
-	public String gettLat(){
-		return lat;
+	public Double getLat(){
+		Log.d("PLACE--lat", lat);
+		return Double.valueOf(lat);
 	}
 	
-	public String getLng(){
-		return lng;
+	public Double getLng(){
+		Log.d("PLACE--lng", lng);
+		return Double.valueOf(lng);
 	}
 	
 	public String getName(){

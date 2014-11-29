@@ -389,7 +389,7 @@ LocationListener {
 		LocationRequest request = LocationRequest.create();
 		request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 		request.setInterval(20000);
-		request.setFastestInterval(10000);
+		request.setFastestInterval(15000);
 		mLocationClient.requestLocationUpdates(request, this);
 	}
 
@@ -419,6 +419,7 @@ LocationListener {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		currentMember.updateDisplay(UID, loc.getLatitude(), loc.getLongitude());
 	}
 
 	@Override
