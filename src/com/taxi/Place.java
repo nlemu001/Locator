@@ -6,12 +6,16 @@ public class Place {
 	private String street;
 	private String city;
 	private Integer uid;
+	private String lat;
+	private String lng;
 	
 	public Place(){
 		name = "home";
 		street = "123 Fake St.";
 		city = "Springfield, MI";
 		uid = 0;
+		lat = "0";
+		lng = "0";
 	}
 	
 	public Place(String n, String s, String c, Integer u){
@@ -19,6 +23,8 @@ public class Place {
 		street = s;
 		city = c;
 		uid = u;
+		lat = "0";
+		lng = "0";
 	}
 	
 	public void setName(String n){
@@ -35,6 +41,22 @@ public class Place {
 	
 	public void setID(Integer n){
 		uid = n;
+	}
+	
+	public void setLat(Double Lat){
+		lat = Lat.toString();
+	}
+	
+	public void setLng(Double Lng){
+		lat = Lng.toString();
+	}
+	
+	public String gettLat(){
+		return lat;
+	}
+	
+	public String getLng(){
+		return lng;
 	}
 	
 	public String getName(){

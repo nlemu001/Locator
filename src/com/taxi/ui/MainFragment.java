@@ -7,13 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -33,7 +27,6 @@ import android.location.Address;
 import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -66,11 +59,9 @@ public class MainFragment extends Fragment implements OnClickListener
 
 	private MapView mMapView;
 	private GoogleMap mMap;
-	private GPSTracker gps;
 	private Context context;
 	private Member currentMember;
 
-	
 	@SuppressLint("InflateParams") @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.main_container, null);
@@ -81,9 +72,7 @@ public class MainFragment extends Fragment implements OnClickListener
 		}
 		context = v.getContext ();
 		currentMember = ((Member) getActivity().getApplication());
-		
-		gps = new GPSTracker (context);
-		
+
 		try{
 			new GetDisplayDataTask (currentMember.getID ()).execute ().get ();
 		} catch (Exception e) {
@@ -95,15 +84,7 @@ public class MainFragment extends Fragment implements OnClickListener
 	}
 
 	private void initButtons(View v) {
-		View b = v.findViewById (R.id.btnSearch);
-		b.setOnTouchListener (CustomActivity.TOUCH);
-		b.setOnClickListener (this);
-
-		b = v.findViewById(R.id.btnCall);
-		b.setOnTouchListener(CustomActivity.TOUCH);
-		b.setOnClickListener(this);
-
-		b = v.findViewById(R.id.btnCheckin);
+		View b = v.findViewById(R.id.btnCheckin);
 		b.setOnTouchListener(CustomActivity.TOUCH);
 		b.setOnClickListener(this);
 	}
@@ -118,29 +99,18 @@ public class MainFragment extends Fragment implements OnClickListener
 		String nname = "404";
 		Double latitude = 0.0;
 		Double longitude = 0.0;
-		Integer uid = 0;
+		Integer uid = id;
 		HashMap<String, Object> map = currentMember.getDisplay (id);
-		if (id.equals (currentMember.getID ()) && gps.canGetLocation()){
-			Log.d ("LOOP", "FIRST");
-			uid = id;
-			latitude = gps.getLatitude();
-			longitude = gps.getLongitude();
+		if (id.equals (currentMember.getID ())){
+			latitude = (Double) map.get ("lat");
+			longitude = (Double) map.get ("lng");
 			nname = currentMember.getNickname();
 		} else if (currentMember.inDisplay (id)) {
-			Log.d ("LOOP", "SECOND");
-			
-			uid = id;
 			nname = (String) map.get ("nickname");
 			latitude = (Double) map.get ("lat");
 			longitude = (Double) map.get ("lng");
 		}
-		
-		try {
-			new UpdateLocationTask (uid, latitude, longitude).execute ().get ();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
+
 		Geocoder gc = new Geocoder (context, Locale.getDefault ());
 		List<Address> list = gc.getFromLocation (latitude, longitude, 1);
 		Address add = list.get(0);
@@ -148,14 +118,6 @@ public class MainFragment extends Fragment implements OnClickListener
 		String city = add.getAddressLine(1);
 		String adress = street + "\n" + city;
 
-		//debug
-		Log.d ("lat = ", String.valueOf(latitude));
-		Log.d ("lng = ", String.valueOf(longitude));
-		Log.d ("st = ", String.valueOf(street));
-		Log.d ("cit = ", String.valueOf(city));
-		Log.d ("nname = ", nname);
-		Log.d ("uid = ", String.valueOf(uid));
-		
 		createMarker (uid, latitude, longitude, nname, adress);
 	}
 
@@ -165,13 +127,13 @@ public class MainFragment extends Fragment implements OnClickListener
 		.position (latlng)
 		.title (nname)
 		.snippet (address);
-		
+
 		if (uid.equals(currentMember.getID())){
 			options.icon (BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
 		}else {
 			options.icon (BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
 		}
-		
+
 		mMap.addMarker (options);
 		mMap.setOnInfoWindowClickListener (new OnInfoWindowClickListener () {
 			@Override
@@ -182,37 +144,35 @@ public class MainFragment extends Fragment implements OnClickListener
 				}
 			}
 		});
-		
+
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		
+
 		map.put ("marker", options);
 		map.put ("uid", uid);
 		map.put ("lat", lat);
 		map.put ("lng", lng);
 		map.put ("nickname", nname);
-		
+
 		currentMember.addDisplay (uid, map);
-		
+
 		mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (latlng, 18));
-		//markers ().showInfoWindow();
 	}
-	
+
 	private void loadMarkers() {
 		mMap.clear ();
 		for (Integer i: currentMember.display.keySet()) {
 			try {
-				Log.d ("DEBUG", String.valueOf(i));
 				setupMapMarkers (i);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
 	}
-	
+
 	private class CustomInfoWindowAdapter implements InfoWindowAdapter {
 		private final View mContents;
 		private ImageView picture;
-		
+
 		@SuppressLint("InflateParams") 
 		CustomInfoWindowAdapter () {
 			this.mContents = getActivity().getLayoutInflater().inflate(R.layout.map_popup, null);
@@ -223,14 +183,13 @@ public class MainFragment extends Fragment implements OnClickListener
 			picture = (ImageView) mContents.findViewById (R.id.imageView1);
 			TextView tv_nickname = (TextView) mContents.findViewById(R.id.title);
 			TextView tv_address = (TextView) mContents.findViewById (R.id.snippet);
-			
+
 			String address = marker.getSnippet();
 			SpannableString addressFormat = new SpannableString (address);
 			String nickname = marker.getTitle();
 			SpannableString nicknameFormat = new SpannableString (nickname);
-			
+
 			String UID = currentMember.IDfromNickname(nickname);
-			Log.d ("UID", UID);
 			try {
 				new DisplayImageFromURL ()
 				.execute ("https://s3-us-west-1.amazonaws.com/familylocatorprofile/" + UID + ".jpeg")
@@ -238,7 +197,7 @@ public class MainFragment extends Fragment implements OnClickListener
 			} catch (Exception e) {
 				e.printStackTrace ();
 			} 
-			
+
 			if (nickname != null) {
 				nicknameFormat.setSpan (new StyleSpan (Typeface.BOLD), 0, nickname.length (), 0);
 				tv_nickname.setText (nicknameFormat);
@@ -246,10 +205,10 @@ public class MainFragment extends Fragment implements OnClickListener
 			else {
 				tv_nickname.setText ("undefined user");
 			}
-			
+
 			addressFormat.setSpan (new StyleSpan (Typeface.ITALIC), 0, addressFormat.length (), 0);
 			tv_address.setText (addressFormat);
-			
+
 			return mContents;
 		}
 
@@ -258,56 +217,56 @@ public class MainFragment extends Fragment implements OnClickListener
 			return null;
 		}
 
-				
-		private class DisplayImageFromURL extends AsyncTask<String, Void, Bitmap> {
-            ProgressDialog pd;
-          
-            @Override
-            protected void onPreExecute() {
-            	super.onPreExecute();
-            	pd = new ProgressDialog(getActivity());
-            	pd.setMessage("Loading...");
-            	pd.show();
-            }
-            protected Bitmap doInBackground(String... urls) {
-            	String urldisplay = urls[0];
-            	Bitmap mIcon11 = null;
-            	try { InputStream in = new java.net.URL(urldisplay).openStream();
-            	mIcon11 = BitmapFactory.decodeStream(in);
-            	mIcon11= Bitmap.createScaledBitmap(mIcon11, 100, 100, true);
-            	picture.setImageBitmap (mIcon11);
-            	} catch (Exception e) {
-            		Log.e("Error: Problem downloading image: ", e.getMessage());
-            		e.printStackTrace();
-            	}return mIcon11;
-            }
 
-            protected void onPostExecute (Bitmap result) {
-            	pd.dismiss ();
-            }
+		private class DisplayImageFromURL extends AsyncTask<String, Void, Bitmap> {
+			ProgressDialog pd;
+
+			@Override
+			protected void onPreExecute() {
+				super.onPreExecute();
+				pd = new ProgressDialog(getActivity());
+				pd.setMessage("Loading...");
+				pd.show();
+			}
+			protected Bitmap doInBackground(String... urls) {
+				String urldisplay = urls[0];
+				Bitmap mIcon11 = null;
+				try { 
+					InputStream in = new java.net.URL(urldisplay).openStream();
+					mIcon11 = BitmapFactory.decodeStream(in);
+					mIcon11= Bitmap.createScaledBitmap(mIcon11, 100, 100, true);
+					picture.setImageBitmap (mIcon11);
+				} catch (Exception e) {
+					Log.e("Error: Problem downloading image: ", e.getMessage());
+					e.printStackTrace();
+				}
+				return mIcon11;
+			}
+
+			protected void onPostExecute (Bitmap result) {
+				pd.dismiss ();
+			}
 		}
 	}
 
 	@Override
-	public void onResume() 
-	{
+	public void onResume() {
 		super.onResume();
 		mMapView.onResume();
 		mMap = mMapView.getMap();
-		try
-		{
+		try {
 			new GetDisplayDataTask (currentMember.getID ()).execute ().get ();
 		} 
-		catch (Exception e) 
-		{
+		catch (Exception e) {
 			e.printStackTrace();
 		}
-		if (mMap != null) 
-		{
+		if (mMap != null) {
 			mMap.setInfoWindowAdapter (new CustomInfoWindowAdapter ());
-			try 
-			{
-				setupMapMarkers (currentMember.getID ());
+			try {
+				mMap.clear();
+				String user = currentMember.IDfromNickname(currentMember.userNN);
+				currentMember.userNN = currentMember.getNickname();
+				setupMapMarkers (Integer.valueOf(user));
 			} 
 			catch (IOException e) {
 				e.printStackTrace();
@@ -317,7 +276,6 @@ public class MainFragment extends Fragment implements OnClickListener
 
 	@Override
 	public void onPause () {
-
 		mMapView.onPause ();
 		if (mMap != null)
 			mMap.setInfoWindowAdapter (null);
@@ -341,82 +299,20 @@ public class MainFragment extends Fragment implements OnClickListener
 		super.onSaveInstanceState(outState);
 		mMapView.onSaveInstanceState(outState);
 	}
-		
-	class UpdateLocationTask extends AsyncTask <String, String, Void> {
-		private ProgressDialog progressDialog = new ProgressDialog(context);
-		    InputStream is = null ;
-		    String result = "";
-		    String UID = null;
-		    String lat = null;
-		    String lng = null;
-		    UpdateLocationTask (Integer id, Double latitude, Double longitude){
-		    	this.UID = String.valueOf(id);
-		    	this.lat = String.valueOf(latitude);
-		    	this.lng = String.valueOf(longitude);
-		    }
-		    
-		    
-		    protected void onPreExecute() 
-		    {
-		       progressDialog.setMessage("Updating Location");
-		       progressDialog.show();
-		       progressDialog.setOnCancelListener(new OnCancelListener() {
-		    	   @Override
-		    	   public void onCancel(DialogInterface arg0) 
-		    	   {
-		    		   UpdateLocationTask.this.cancel(true);
-		    	   }
-		      });
-		    }
-		      
-		    @Override
-			protected Void doInBackground(String... params) 
-		    {
-			      String url = "http://rishinaik.com/familyLocator/update_location.php";
-			    	   
-			      HttpClient httpClient = new DefaultHttpClient();
-				  HttpPost httpPost = new HttpPost(url);
-			      ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
-			      
-			      Log.d ("INSIDE lat = ", lat);
-			      Log.d ("INSIDE lng = ", lng);
-			      
-			      param.add (new BasicNameValuePair("uid", UID));
-			      param.add (new BasicNameValuePair("lat", lat));
-			      param.add (new BasicNameValuePair("lng", lng));
-			      
-				  try   {
-					httpPost.setEntity(new UrlEncodedFormEntity(param));
-					HttpResponse httpResponse = httpClient.execute(httpPost);
-					HttpEntity httpEntity = httpResponse.getEntity();
 
-					is =  httpEntity.getContent();					
-		
-				  }
-				  catch (Exception e) {
-					Log.e("log_tag", "Error in http connection "+e.toString());
-				  }				  
-				  return null;
-			}
-		    
-			protected void onPostExecute(Void v) 	{
-				this.progressDialog.dismiss();
-			}
-	    }
-	
 	@Override
-	public void onClick(View v)
-	{
-		if (v.getId() == R.id.btnSearch)
-			SearchDialog.show((FragmentActivity) getActivity());
-		else if (v.getId() == R.id.btnCall)
-			CallDialog.show((FragmentActivity) getActivity());
-		else if (v.getId() == R.id.btnCheckin) {
-			gps.getLocation ();
+	public void onClick(View v) {
+		if (v.getId() == R.id.btnCheckin) {
+			try{
+				new GetDisplayDataTask (currentMember.getID ()).execute ().get ();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			mMap.clear();
 			loadMarkers();
 		}
 	}
-	
+
 	class GetDisplayDataTask extends AsyncTask<String, String, String> {
 		JSONParser jParser = new JSONParser ();
 		private ProgressDialog progressDialog = new ProgressDialog (context);
@@ -429,7 +325,6 @@ public class MainFragment extends Fragment implements OnClickListener
 		}
 
 		protected void onPreExecute () {
-			Log.d ("GetDisplayTask", "onPreExecute");
 			progressDialog.setMessage ("Getting data");
 			progressDialog.show ();
 			progressDialog.setOnCancelListener (new OnCancelListener () {
@@ -442,12 +337,9 @@ public class MainFragment extends Fragment implements OnClickListener
 
 		@Override
 		protected String doInBackground (String... params) {
-			Log.d ("GetDisplayTask", "doInBackground");
 			String url = "http://rishinaik.com/familyLocator/get_users_to_display.php";
 			ArrayList<NameValuePair> param = new ArrayList<NameValuePair> ();
-			Log.d ("dib", "in finct");
 			param.add (new BasicNameValuePair ("uid", UID));
-			Log.d ("GetDisplayTask", "UID = " + UID);
 			JSONObject json = jParser.makeHttpRequest (url, "POST", param);
 			Log.d ("DATA", json.toString ());
 			try {
@@ -468,9 +360,8 @@ public class MainFragment extends Fragment implements OnClickListener
 						map.put ("lng", lng);
 						map.put ("nickname", nname);
 						currentMember.addDisplay (id, map);
-						Log.d ("GetDisplayTask", "loop - " + nname);
 					}
-					Log.d ("GetDisplayTask", "Done");
+					Log.d ("GetDisplayTask", "YAY :)");
 				} else {
 					Log.d ("GetDisplayTask", "OH NO! :(");
 				}
@@ -487,7 +378,6 @@ public class MainFragment extends Fragment implements OnClickListener
 			if (progressDialog.isShowing ()) {
 				progressDialog.dismiss ();
 			}
-			Log.d ("GetDisplayTask", "onPostExecute");
 		}
 	}
 

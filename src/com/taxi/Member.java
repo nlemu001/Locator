@@ -189,6 +189,11 @@ public class Member extends Application {
 		userPlaces.add(new Place(n, s, c, this.ID));
 	}
 	
+	public void addPlace(Place p){
+		//userPlaces.add(new Place(n, s, c, this.ID));
+		userPlaces.add(p);
+	}
+	
 	public void clearPlaces(){
 		userPlaces.clear();
 	}

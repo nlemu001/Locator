@@ -116,7 +116,7 @@ public class ProfileActivity extends Activity{
         }
     }
     
-
+    
     /* makes sure that we are up to date on the transfers */
 
 		// used to download a photo from AWS using a URL

@@ -1,57 +1,47 @@
 package com.taxi;
 
-import java.util.ArrayList;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONObject;
+import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+import com.parse.Parse;
+import com.parse.ParseObject;
 import com.taxi.custom.CustomActivity;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Activity PaymentPopup is launched when user proceed for the payment of
- * Taxi he/she want to book. Currently it will be launched when user tap on
- * middle button located at the bottom of the Map screen. It will also launched
- * when user click on Reserve button in Search dialog. You must customize and
- * enhance this as per your needs.
- */
 public class NewPlacePopup extends CustomActivity
 {
 	EditText nameET;
 	EditText addressET;
 	EditText cityET;
-	JSONParser jsonParser = new JSONParser ();
 	String nUID = "";
 	String placename = "";
 	String placeaddress = "";
 	String placecity = "";
 	Integer ID;
+	Geocoder gc = new Geocoder(this);
 	
 	Member currentMember;
 	
-	/* (non-Javadoc)
-	 * @see android.support.v4.app.FragmentActivity#onCreate(android.os.Bundle)
-	 */
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_place_popup);
+		
+		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
+		
 		currentMember = ((Member) this.getApplication());
 		nUID = ((Member) this.getApplication()).ID.toString();
 		ID = ((Member) this.getApplication()).ID;
@@ -85,35 +75,72 @@ public class NewPlacePopup extends CustomActivity
 		    	placeaddress = addressET.getText().toString();
 		    	placecity = cityET.getText().toString();
 		    	
-		    	// Insert logic for creating a new place
-		    	
-		    	new UpdateUserTask().execute();
-		    	currentMember.addPlace(placename, placeaddress, placecity);
-		    	// ----------------------------------
+				
+				try {
+					List<Address> list = gc.getFromLocationName(placeaddress + placecity, 1);
+					Address add = list.get(0);
+					String locality = add.getLocality();
+					
+					Double lat = add.getLatitude();
+					Double lng = add.getLongitude();
+					Place p = new Place(placename, placeaddress, placecity, ID);
+					p.setLat(lat);
+					p.setLng(lng);
+					currentMember.addPlace(p);
+					
+					try {
+						new UpdatePlaceTask(lat, lng).execute().get();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ExecutionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 		    }
 		});
 	}
 
-	
-	class UpdateUserTask extends AsyncTask<String, String, String> {
+	class UpdatePlaceTask extends AsyncTask<String, String, String> {
 
 		private ProgressDialog progressDialog = new ProgressDialog(NewPlacePopup.this);
-		private String uid = nUID;
-
+		private String latitude;
+		private String longitude;
+		
+		UpdatePlaceTask(Double lat, Double lng){
+			latitude = lat.toString();
+			longitude = lng.toString();
+		}
+		
 	    protected void onPreExecute() {
 			progressDialog.setMessage("Creating Place");
 			progressDialog.show();
 			progressDialog.setOnCancelListener(new OnCancelListener() {
 				@Override
 				public void onCancel(DialogInterface arg0) {
-					UpdateUserTask.this.cancel(true);
+					UpdatePlaceTask.this.cancel(true);
 				}
 			});
 		}
 	      
 	    @Override
 		protected String doInBackground(String... params) {
-	    	// TO-DO create new_place.php
+	    	
+	    	ParseObject newPlace = new ParseObject("places");
+	    	newPlace.put("name", placename);
+	    	newPlace.put("street", placeaddress);
+	    	newPlace.put("city", placecity);
+	    	newPlace.put("uid", ID);
+	    	newPlace.put("latitude", latitude);
+	    	newPlace.put("longitude", longitude);
+	    	newPlace.saveInBackground();
+	    	
+	    	/*
 	    	String url = "http://rishinaik.com/familyLocator/insert_place.php";
 	    	ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
 
@@ -136,6 +163,7 @@ public class NewPlacePopup extends CustomActivity
 			catch (Exception e) {
 				Log.e("log_tag", "Error in http connection "+e.toString());
 			}
+			*/
 			if (progressDialog.isShowing()) {
 				progressDialog.dismiss();
 	        }

@@ -1,31 +1,26 @@
 package com.taxi;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import com.google.android.gms.maps.model.Marker;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
 import android.content.DialogInterface.OnCancelListener;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
+
+import com.parse.FindCallback;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 
 public class Places extends Activity{
 	ProgressDialog pd;
@@ -34,6 +29,8 @@ public class Places extends Activity{
 	String nname;
 	String phonenum;
 	Context context;
+	ListView listview;
+	PlaceRowAdapter adapter;
 	
 	Member currentMember;
 	ArrayList<Place> places = new ArrayList<Place>();;
@@ -43,15 +40,17 @@ public class Places extends Activity{
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.places);
+		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
+		
 		context = this;
 		currentMember = ((Member) this.getApplication());
+		UID = currentMember.getID();
 		try{
-			new GetDisplayDataTask (currentMember.getID ()).execute ().get ();
+			new GetDisplayDataTask (UID).execute ().get ();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
-		
+				
         final Context context = this;
         final Button newplacebtn = (Button) findViewById(R.id.places_newBtn);
         newplacebtn.setOnClickListener(new View.OnClickListener() {
@@ -60,27 +59,23 @@ public class Places extends Activity{
             }
         });
         
-        ListView listview = (ListView)findViewById(R.id.placesList);
+        listview = (ListView)findViewById(R.id.placesList);
         
         listview.setAdapter(null);
         places = currentMember.getPlaces();
-        PlaceRowAdapter adapter = new PlaceRowAdapter(this, places);
+        adapter = new PlaceRowAdapter(this, places);
         listview.setAdapter(adapter);
 	}
 
 	class GetDisplayDataTask extends AsyncTask<String, String, String> {
-		JSONParser jParser = new JSONParser ();
 		private ProgressDialog progressDialog = new ProgressDialog (context);
-		JSONArray Data;
-
-		private String UID = null;
-
+		private Integer UID = null;
+		
 		GetDisplayDataTask (Integer id){
-			this.UID = String.valueOf (id);
+			this.UID = id;
 		}
 
 		protected void onPreExecute () {
-			Log.d ("GetDisplayTask", "onPreExecute");
 			progressDialog.setMessage ("Getting data");
 			progressDialog.show ();
 			progressDialog.setOnCancelListener (new OnCancelListener () {
@@ -92,8 +87,30 @@ public class Places extends Activity{
 		}       
 
 		@Override
-		protected String doInBackground (String... params) {
-			Log.d ("GetDisplayTask", "doInBackground");
+		protected String doInBackground (String... params) {			
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("places");
+			query.whereEqualTo("uid", UID);
+			query.findInBackground(new FindCallback<ParseObject>() 
+			{
+			public void done(List<ParseObject> placesList, ParseException e) 
+			    {
+			        if (e != null) {
+			            //ERROR
+			        	Log.d("score", "Error: " + e.getMessage());
+			        }
+			        else{
+			        	currentMember.clearPlaces();
+			        	for (int i = 0; i < placesList.size(); i++) {
+							currentMember.addPlace(placesList.get(i).getString("name"), 
+												   placesList.get(i).getString("street"), 
+												   placesList.get(i).getString("city"));
+						}
+			        }
+			        adapter.notifyDataSetChanged();
+			    }
+			});
+			
+			/*
 			String url = "http://rishinaik.com/familyLocator/get_places.php";
 			ArrayList<NameValuePair> param = new ArrayList<NameValuePair> ();
 			
@@ -118,7 +135,7 @@ public class Places extends Activity{
 				}
 			} catch (JSONException e) {
 				e.printStackTrace ();
-			}
+			}*/
 			if (progressDialog.isShowing ()) {
 				progressDialog.dismiss ();
 			}
@@ -129,7 +146,6 @@ public class Places extends Activity{
 			if (progressDialog.isShowing ()) {
 				progressDialog.dismiss ();
 			}
-			Log.d ("GetDisplayTask", "onPostExecute");
 		}
 	}
 }
