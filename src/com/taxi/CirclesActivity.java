@@ -107,7 +107,7 @@ public class CirclesActivity extends Activity
 							else  if(choice == 1)
 							{
 								Log.d("POS 1", "IN IF");
-								Intent intent = new Intent(CirclesActivity.this, CircleRemoveMember.class);
+								Intent intent = new Intent(CirclesActivity.this, parseRemoveMemberFromCircle.class);
 								intent.putExtra("cname", currentCircle.getCircleName());
 								startActivity (intent);
 							}
