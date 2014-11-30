@@ -2,6 +2,7 @@ package com.taxi;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -21,6 +22,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.taxi.custom.CustomActivity;
 
 public class NewPhonePopup extends CustomActivity
@@ -29,7 +33,7 @@ public class NewPhonePopup extends CustomActivity
 	String nName;
 	JSONParser jsonParser = new JSONParser ();
 	
-	String nUID = "";
+	Integer nUID = 0;
 	String nNick = "";
 	String nPass = "";
 	String pnum  = "";
@@ -46,7 +50,7 @@ public class NewPhonePopup extends CustomActivity
 		WindowManager.LayoutParams wmlp = getWindow().getAttributes();
 		wmlp.gravity = Gravity.BOTTOM;
 		nPass = ((Member) this.getApplication()).password;
-		nUID = ((Member) this.getApplication()).ID.toString();
+		nUID = ((Member) this.getApplication()).ID;
 		nName = ((Member) this.getApplication()).getNickname();
 		setupView();
 	}
@@ -94,7 +98,7 @@ public class NewPhonePopup extends CustomActivity
 	class UpdateUserTask extends AsyncTask<String, String, String> {
 
 		private ProgressDialog progressDialog = new ProgressDialog(NewPhonePopup.this);
-		private String uid = nUID;
+		private Integer uid = nUID;
 		private String nickname = nNick;
 	    private String password = nPass;
 	    private String phonenum = pnum;
@@ -112,6 +116,19 @@ public class NewPhonePopup extends CustomActivity
 	      
 	    @Override
 		protected String doInBackground(String... params) {
+	    	
+	    	ParseQuery<ParseObject> query = ParseQuery.getQuery("users");
+			query.whereEqualTo("uid", uid);
+			List<ParseObject> placesList;
+			try {
+				placesList = query.find();
+				placesList.get(0).put("phone", phonenum);
+				placesList.get(0).save();
+			} catch (ParseException e1) {
+				e1.printStackTrace();
+			}
+	    	
+	    	/*
 	    	String url = "http://rishinaik.com/familyLocator/update_user.php";
 	    	ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
 
@@ -133,7 +150,7 @@ public class NewPhonePopup extends CustomActivity
 			}
 			catch (Exception e) {
 				Log.e("log_tag", "Error in http connection "+e.toString());
-			}
+			}*/
 			if (progressDialog.isShowing()) {
 				progressDialog.dismiss();
 	        }

@@ -37,6 +37,7 @@ public class Member extends Application {
 		this.phone_num = phone;
 
 	}
+	
 	public HashMap<String, Object> CurrentData () {
 		return display.get (this.ID);
 	}

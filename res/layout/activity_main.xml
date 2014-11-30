@@ -18,13 +18,5 @@
         android:headerDividersEnabled="true"
         android:listSelector="@color/theme_yellow"
          />
-
-    <ListView
-        android:id="@+id/right_drawer"
-        android:layout_width="260dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="end"
-        android:background="@color/theme_black"
-        android:headerDividersEnabled="true" />
  
 </android.support.v4.widget.DrawerLayout>

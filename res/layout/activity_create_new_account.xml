@@ -8,14 +8,15 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.taxi.UserLogin" >
+    tools:context="com.taxi.UserLogin"
+    android:background="#393939" >
 	
     
 		<EditText
 	          android:id="@+id/newUsernameFIELD"
 	          android:layout_width="match_parent"
 	          android:layout_height="wrap_content"
-	          android:hint="Enter a username"
+	          android:hint="New username (email address)"
 	          android:inputType="textEmailAddress"
 	          android:maxLines="1"
 	          android:singleLine="true" 
@@ -26,7 +27,7 @@
 	          android:id="@+id/newNicknameFIELD"
 	          android:layout_width="match_parent"
 	          android:layout_height="wrap_content"
-	          android:hint="Enter a nickname (profile name)"
+	          android:hint="New nickname (profile name)"
 	          android:imeActionId="@+id/login"
 	          android:imeActionLabel="@string/action_sign_in_short"
 	          android:imeOptions="actionUnspecified"
@@ -40,7 +41,7 @@
 	          android:id="@+id/newPasswordFIELD"
 	          android:layout_width="match_parent"
 	          android:layout_height="wrap_content"
-	          android:hint="Enter a password"
+	          android:hint="New password"
 	          android:imeActionId="@+id/login"
 	          android:imeActionLabel="@string/action_sign_in_short"
 	          android:imeOptions="actionUnspecified"
@@ -53,7 +54,7 @@
 	          android:id="@+id/newPhonenumFIELD"
 	          android:layout_width="match_parent"
 	          android:layout_height="wrap_content"
-	          android:hint="Enter a phone number"
+	          android:hint="New phone number (no dashes)"
 	          android:imeActionId="@+id/login"
 	          android:imeActionLabel="@string/action_sign_in_short"
 	          android:imeOptions="actionUnspecified"

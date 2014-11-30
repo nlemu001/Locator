@@ -21,5 +21,13 @@
     <string name="error_password_field_required">Password field is required</string>
     
     <string name="error_userpass_incorrect">Username/Password not valid</string>
+    
+    
+    <!-- CREATE NEW ACCOUNT STRINGS -->
+    <string name="error_username_exists">Username already exists</string>
+    <string name="error_nickname_required">Nickname field required</string>
+    <string name="error_nickname_toolong">Must be less than 12 characters</string>
+    <string name="error_phoneNum_field_required">Phone # field is required</string>
+    <string name="error_phoneNum_field_incorrect">Phone should be 10 digits (0-9 only)</string>
 
 </resources>

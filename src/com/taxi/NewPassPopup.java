@@ -1,6 +1,7 @@
 package com.taxi;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
@@ -20,6 +21,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
 import com.taxi.NewNnamePopup.UpdateUserTask;
 import com.taxi.custom.CustomActivity;
 
@@ -39,7 +43,7 @@ public class NewPassPopup extends CustomActivity
 	
 JSONParser jsonParser = new JSONParser ();
 	
-	String nUID = "";
+	Integer nUID = 0;
 	String nNick = "";
 	String nPass = "";
 	
@@ -52,7 +56,7 @@ JSONParser jsonParser = new JSONParser ();
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_pass_popup);
 		nNick = ((Member) this.getApplication()).nickname;
-		nUID = ((Member) this.getApplication()).ID.toString();
+		nUID = ((Member) this.getApplication()).ID;
 		WindowManager.LayoutParams wmlp = getWindow().getAttributes();
 		wmlp.gravity = Gravity.BOTTOM;
 
@@ -92,7 +96,7 @@ JSONParser jsonParser = new JSONParser ();
 	class UpdateUserTask extends AsyncTask<String, String, String> {
 
 		private ProgressDialog progressDialog = new ProgressDialog(NewPassPopup.this);
-		private String uid = nUID;
+		private Integer uid = nUID;
 		private String nickname = nNick;
 	    private String password = nPass;
 
@@ -109,6 +113,17 @@ JSONParser jsonParser = new JSONParser ();
 	      
 	    @Override
 		protected String doInBackground(String... params) {
+	    	ParseQuery<ParseObject> query = ParseQuery.getQuery("users");
+			query.whereEqualTo("uid", uid);
+			List<ParseObject> placesList;
+			try {
+				placesList = query.find();
+				placesList.get(0).put("password", password);
+				placesList.get(0).save();
+			} catch (ParseException e1) {
+				e1.printStackTrace();
+			}
+	    	/*
 	    	String url = "http://rishinaik.com/familyLocator/update_user.php";
 	    	ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
 			HttpClient httpClient = new DefaultHttpClient();
@@ -131,7 +146,7 @@ JSONParser jsonParser = new JSONParser ();
 			}
 			catch (Exception e) {
 				Log.e("log_tag", "Error in http connection "+e.toString());
-			}
+			}*/
 			if (progressDialog.isShowing()) {
 				progressDialog.dismiss();
 	        }

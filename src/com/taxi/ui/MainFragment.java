@@ -7,12 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.app.ProgressDialog;
@@ -55,7 +49,6 @@ import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.taxi.JSONParser;
 import com.taxi.Member;
 import com.taxi.Place;
 import com.taxi.ProfileActivity;
@@ -86,7 +79,7 @@ public class MainFragment extends Fragment implements OnClickListener
 		currentMember = ((Member) getActivity().getApplication());
 
 		try{
-			new GetDisplayDataTask (currentMember.getID ()).execute ().get ();
+			new GetDisplayDataTask ().execute ().get ();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -128,17 +121,19 @@ public class MainFragment extends Fragment implements OnClickListener
 		Integer uid = id;
 		HashMap<String, Object> map = currentMember.getDisplay (id);
 		if (id.equals (currentMember.getID ())){
-			latitude = (Double) map.get ("lat");
-			longitude = (Double) map.get ("lng");
+			Log.d("test--", "am user" );
+			latitude =  Double.valueOf((String) map.get ("lat"));
+			longitude = Double.valueOf((String) map.get ("lng"));
+			Log.d("test--", (String) map.get ("lat"));
 			mLat = latitude;
 			mLng = longitude;
 			nname = currentMember.getNickname();
 		} else if (currentMember.inDisplay (id)) {
+			Log.d("test--", "am NOT user" );
 			nname = (String) map.get ("nickname");
-			latitude = (Double) map.get ("lat");
-			longitude = (Double) map.get ("lng");
+			latitude = Double.valueOf((String) map.get ("lat"));
+			longitude = Double.valueOf((String) map.get ("lng"));
 		}
-
 		Geocoder gc = new Geocoder (context, Locale.getDefault ());
 		List<Address> list = gc.getFromLocation (latitude, longitude, 1);
 		Address add = list.get(0);
@@ -283,7 +278,7 @@ public class MainFragment extends Fragment implements OnClickListener
 		mMapView.onResume();
 		mMap = mMapView.getMap();
 		try {
-			new GetDisplayDataTask (currentMember.getID ()).execute ().get ();
+			new GetDisplayDataTask ().execute ().get ();
 		} 
 		catch (Exception e) {
 			e.printStackTrace();
@@ -341,7 +336,7 @@ public class MainFragment extends Fragment implements OnClickListener
 		}
 		else if (v.getId() == R.id.btnCheckin) {
 			try{
-				new GetDisplayDataTask (currentMember.getID ()).execute ().get ();
+				new GetDisplayDataTask ().execute ().get ();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -351,16 +346,7 @@ public class MainFragment extends Fragment implements OnClickListener
 	}
 
 	class GetDisplayDataTask extends AsyncTask<String, String, String> {
-		JSONParser jParser = new JSONParser ();
 		private ProgressDialog progressDialog = new ProgressDialog (context);
-		JSONArray Data;
-
-		private String UID = null;
-
-		GetDisplayDataTask (Integer id){
-			this.UID = String.valueOf (id);
-		}
-
 		protected void onPreExecute () {
 			progressDialog.setMessage ("Getting data");
 			progressDialog.show ();
@@ -374,37 +360,29 @@ public class MainFragment extends Fragment implements OnClickListener
 
 		@Override
 		protected String doInBackground (String... params) {
-			String url = "http://rishinaik.com/familyLocator/get_users_to_display.php";
-			ArrayList<NameValuePair> param = new ArrayList<NameValuePair> ();
-			param.add (new BasicNameValuePair ("uid", UID));
-			JSONObject json = jParser.makeHttpRequest (url, "POST", param);
-			Log.d ("DATA", json.toString ());
-			try {
-				int success = json.getInt ("success");
-				if (success == 1) {
-					Log.d ("GetDisplayTask", "success");
-					Data = json.getJSONArray ("retval");
+			ParseQuery<ParseObject> inner = ParseQuery.getQuery("circles");
+            inner.whereEqualTo("adminID", currentMember.getID());
+        	ParseQuery<ParseObject> outter = ParseQuery.getQuery("users");
+        	outter.whereMatchesKeyInQuery("uid", "membersID", inner);
+        	List<ParseObject> result = null;
+        	try {
+                result = outter.find();
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
 
-					for (int i = 0; i < Data.length (); i++) {
-						JSONObject data = Data.getJSONObject (i);
-						HashMap<String, Object> map = new HashMap<String, Object>();
-						Integer id = data.getInt ("uid");
-						String nname = data.getString ("nickname");
-						Double lat = data.getDouble ("lat");
-						Double lng = data.getDouble ("lng");
-						map.put ("uid", id);
-						map.put ("lat", lat);
-						map.put ("lng", lng);
-						map.put ("nickname", nname);
-						currentMember.addDisplay (id, map);
-					}
-					Log.d ("GetDisplayTask", "YAY :)");
-				} else {
-					Log.d ("GetDisplayTask", "OH NO! :(");
-				}
-			} catch (JSONException e) {
-				e.printStackTrace ();
-			}
+        	for (ParseObject o : result) {
+        		HashMap<String, Object> map = new HashMap<String, Object>();
+        		Integer id = o.getInt ("uid");
+        		String nname = o.getString ("nickname");
+        		String lat = o.getString ("latitude");
+        		String lng = o.getString ("longitude");
+        		map.put ("uid", id);
+        		map.put ("lat", lat);
+        		map.put ("lng", lng);
+        		map.put ("nickname", nname);
+        		currentMember.addDisplay (id, map);
+        	}
 			if (progressDialog.isShowing ()) {
 				progressDialog.dismiss ();
 			}
@@ -442,7 +420,6 @@ public class MainFragment extends Fragment implements OnClickListener
 				.strokeColor(Color.BLUE)
 				.strokeWidth(3);
 			mMap.addCircle(options);
-			Log.d("PLACE--loop", p.getName()+" at ("+p.getLat()+", "+p.getLng()+")");
 		}
 	}
 	

@@ -134,11 +134,34 @@ public class UserLogin extends Activity implements OnClickListener
 	@Override
 	public void onClick(View v) 
 	{
-		// TODO Auto-generated method stub
 		switch(v.getId()) 
 		{
 			case R.id.signIN:
 			{
+				
+				ParseQuery<ParseObject> query = ParseQuery.getQuery("users");
+				query.whereEqualTo("username", usernameField.getText().toString());
+				query.whereEqualTo("password", passwordField.getText().toString());
+				List<ParseObject> usersList;
+				try {
+					usersList = query.find();
+					if(usersList.size() == 0){
+						dbcontentdoesntmatch = true;
+				        passwordField.setError(getString(R.string.error_userpass_incorrect));
+						focusView = passwordField;
+						focusView.requestFocus();
+					}
+					else{
+						nicknameFromLogin = usersList.get(0).getString("nickname");
+			        	phoneFromLogin = usersList.get(0).getString("phone");
+			        	idFromLogin = usersList.get(0).getInt("uid");
+			        	Log.d("USERID", "USERID: " + idFromLogin);
+		        		dbcontentdoesntmatch = false;
+					}
+				} catch (ParseException e1) {
+					e1.printStackTrace();
+				}
+				/*
 				ParseQuery<ParseObject> query = ParseQuery.getQuery("users");
 				query.whereEqualTo("username", usernameField.getText().toString());
 				query.whereEqualTo("password", passwordField.getText().toString());
@@ -166,10 +189,14 @@ public class UserLogin extends Activity implements OnClickListener
 				        	idFromLogin = usersList.get(0).getInt("uid");
 				        	Log.d("USERID", "USERID: " + idFromLogin);
 			        		dbcontentdoesntmatch = false;
+			        		
+
 							login();
 				        }
 				    }
 				});
+				*/
+				login();
 				break;
 			}
 		}

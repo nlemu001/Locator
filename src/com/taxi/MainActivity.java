@@ -3,14 +3,9 @@ package com.taxi;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -50,6 +45,12 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
+import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParsePush;
+import com.parse.ParseQuery;
+import com.parse.PushService;
 import com.taxi.custom.CustomActivity;
 import com.taxi.model.Feed;
 import com.taxi.ui.LeftNavAdapter;
@@ -75,14 +76,22 @@ LocationListener {
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate (savedInstanceState);
 		setContentView (R.layout.activity_main);
+		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
+		//PushService.setDefaultPushCallback(this, MainActivity.class);
 		currentMember = (Member) this.getApplication ();
 		UID = currentMember.getID ();
 		uname = currentMember.getUsername ();
 		nname = currentMember.getNickname ();
 		mLocationClient = new LocationClient(this, this, this);
+		//ParsePush.subscribeInBackground(uname);
 		setupActionBar ();
 		setupDrawer ();
 		setupContainer ();
+		
+		//ParsePush push = new ParsePush();
+		//push.setChannel(uname);
+	//	push.setMessage("onCreate finished");
+		//push.sendInBackground();
 	}
 
 	protected void setupActionBar () {
@@ -176,7 +185,7 @@ LocationListener {
 				}
 				else if(arg2 == 3) {
 					try {
-						new GetDataTask (UID).execute ().get ();
+						new GetDataTask ().execute ().get ();
 					} catch (Exception e) {
 						e.printStackTrace ();
 					} 
@@ -237,15 +246,7 @@ LocationListener {
 	}
 
 	private class GetDataTask extends AsyncTask<String, String, String> {
-		JSONParser jParser = new JSONParser ();
 		private ProgressDialog progressDialog = new ProgressDialog (MainActivity.this);
-		JSONArray Data;
-
-		private String UID = null;
-
-		GetDataTask (Integer id){
-			this.UID = String.valueOf (id);
-		}
 
 		protected void onPreExecute () {
 			progressDialog.setMessage ("Getting data");
@@ -258,48 +259,48 @@ LocationListener {
 			});
 		}       
 
-		@Override
+		@SuppressLint("UseSparseArrays") @Override
 		protected String doInBackground (String... params) {
-			String url = "http://rishinaik.com/familyLocator/get_data.php";
-			ArrayList<NameValuePair> param = new ArrayList<NameValuePair> ();
-			param.add (new BasicNameValuePair ("uid", UID));
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("circles");
+			query.whereEqualTo("membersID", currentMember.getID());
+        	ParseQuery<ParseObject> query2 = ParseQuery.getQuery("circles");
+        	query2.whereMatchesKeyInQuery("adminID", "adminID", query);
+        	ParseQuery<ParseObject> query3 = ParseQuery.getQuery("users");
+        	query3.whereMatchesKeyInQuery("uid", "membersID", query2);
+        	List<ParseObject> result = null;
+        	List<ParseObject> result2 = null;
+        	try {
+        		result = query2.find();
+        		result2 = query3.find();
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
+        	Log.d("test>", "1size="+result.size());
+        	Log.d("test>", "2size="+result2.size());
+        	HashMap<Integer, HashMap<String, String>> users = new HashMap<Integer, HashMap<String, String>>();
+        	for (ParseObject o : result2) {
+        		HashMap<String, String> map = new HashMap<String, String>();
+        		map.put("uid", String.valueOf(o.getInt ("uid")));
+        		map.put("lat", o.getString ("latitude"));
+        		map.put("lng", o.getString ("longitude"));
+        		map.put("nickname", o.getString ("nickname"));
+        		users.put(o.getInt("uid"), map);
+        	}
+        	Log.d("test>>", users.toString());
+     	
+        	for (ParseObject o : result) {
+        		Integer admin = o.getInt ("adminID");
+        		String cname = o.getString ("cname");
+        		int index = currentMember.contains (cname, admin);
+        		if (index < 0) {
+        			currentMember.addCircle (new Circle (cname, admin));
+        			int len = currentMember.circles.size ()-1;
+        			currentMember.circles.get (len).addMember(admin, users.get(admin).get("nickname"), users.get(admin));
+        		} else {
+        			currentMember.circles.get (index).addMember (o.getInt("membersID"), users.get(o.getInt("membersID")).get("nickname"), users.get(o.getInt("membersID")));
+        		}
+        	}
 
-			JSONObject json = jParser.makeHttpRequest (url, "POST", param);
-			Log.d ("DATA", json.toString ());
-			currentMember.circles.clear ();
-			try {
-				int success = json.getInt ("success");
-				if (success == 1) {
-					Log.d("DataTask", "success");
-					Data = json.getJSONArray ("retval");
-					for (int i = 0; i < Data.length (); i++) {
-						JSONObject data = Data.getJSONObject (i);
-						HashMap<String, String> map = new HashMap<String, String> ();
-						Integer admin = data.getInt ("adminID");
-						String cname = data.getString ("cname");
-						map.put ("uid", data.getString ("uid"));
-						map.put ("nickname", data.getString("nickname"));
-						map.put ("lat", data.getString("lat"));
-						map.put ("lng", data.getString("lng"));
-						map.put ("phone", data.getString("phone"));
-						int index = currentMember.contains (cname, admin);
-
-						if (index < 0) {
-							currentMember.addCircle (new Circle (cname, admin));
-							int len = currentMember.circles.size ()-1;
-							currentMember.circles.get (len).addMember (admin, map.get ("nickname"), map);
-						} else {
-							currentMember.circles.get (index).addMember (Integer.valueOf (map.get ("uid")), map.get ("nickname"), map);
-						}
-					}
-					Log.d ("GetDataTask", "yay :)");
-				} 
-				else {
-					Log.e ("GetDataTask", "oh, no!");
-				}
-			} catch (JSONException e) {
-				e.printStackTrace ();
-			}
 			if (progressDialog.isShowing ()) {
 				progressDialog.dismiss ();
 			}
@@ -433,11 +434,11 @@ LocationListener {
 		private ProgressDialog progressDialog = new ProgressDialog(MainActivity.this);
 		InputStream is = null ;
 		String result = "";
-		String UID = null;
+		Integer UID = null;
 		String lat = null;
 		String lng = null;
 		UpdateLocationTask (Integer id, Double latitude, Double longitude){
-			this.UID = String.valueOf(id);
+			this.UID = id;
 			this.lat = String.valueOf(latitude);
 			this.lng = String.valueOf(longitude);
 		}
@@ -459,6 +460,19 @@ LocationListener {
 		@Override
 		protected Void doInBackground(String... params) 
 		{
+			ParseQuery<ParseObject> query = ParseQuery.getQuery("users");
+			query.whereEqualTo("uid", UID);
+			List<ParseObject> placesList;
+			try {
+				placesList = query.find();
+				placesList.get(0).put("latitude", lat);
+				placesList.get(0).put("longitude", lng);
+				placesList.get(0).save();
+			} catch (ParseException e1) {
+				e1.printStackTrace();
+			}
+			
+			/*
 			String url = "http://rishinaik.com/familyLocator/update_location.php";
 
 			HttpClient httpClient = new DefaultHttpClient();
@@ -477,7 +491,7 @@ LocationListener {
 			}
 			catch (Exception e) {
 				Log.e("UpdateLocationTask", "Error in http connection "+e.toString());
-			}				  
+			}*/			  
 			return null;
 		}
 
