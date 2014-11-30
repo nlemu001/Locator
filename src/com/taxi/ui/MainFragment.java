@@ -370,18 +370,43 @@ public class MainFragment extends Fragment implements OnClickListener
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
-
-        	for (ParseObject o : result) {
-        		HashMap<String, Object> map = new HashMap<String, Object>();
-        		Integer id = o.getInt ("uid");
-        		String nname = o.getString ("nickname");
-        		String lat = o.getString ("latitude");
-        		String lng = o.getString ("longitude");
-        		map.put ("uid", id);
-        		map.put ("lat", lat);
-        		map.put ("lng", lng);
-        		map.put ("nickname", nname);
-        		currentMember.addDisplay (id, map);
+        	
+        	Log.d("test", result.size() + "");
+        	if (result.size() != 0){
+        		for (ParseObject o : result) {
+        			HashMap<String, Object> map = new HashMap<String, Object>();
+        			Integer id = o.getInt ("uid");
+        			String nname = o.getString ("nickname");
+        			String lat = o.getString ("latitude");
+        			String lng = o.getString ("longitude");
+        			Log.d("test", id + " " + nname+ " " + lat + " " + lng);
+        			map.put ("uid", id);
+        			map.put ("lat", lat);
+        			map.put ("lng", lng);
+        			map.put ("nickname", nname);
+        			currentMember.addDisplay (id, map);
+        		}
+        	} else {
+        		Log.d("test>cheching ID", currentMember.getID() + "");
+        		ParseQuery<ParseObject> q = ParseQuery.getQuery("users");
+                q.whereEqualTo("uid", currentMember.getID());
+                List<ParseObject> result2 = null;
+                try {
+                    result2 = q.find();
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+                HashMap<String, Object> map = new HashMap<String, Object>();
+    			Integer id = result2.get(0).getInt ("uid");
+    			String nname = result2.get(0).getString ("nickname");
+    			String lat = result2.get(0).getString ("latitude");
+    			String lng = result2.get(0).getString ("longitude");
+    			Log.d("test>adding user", id + " " + nname+ " " + lat + " " + lng);
+    			map.put ("uid", id);
+    			map.put ("lat", lat);
+    			map.put ("lng", lng);
+    			map.put ("nickname", nname);
+    			currentMember.addDisplay (id, map);
         	}
 			if (progressDialog.isShowing ()) {
 				progressDialog.dismiss ();
