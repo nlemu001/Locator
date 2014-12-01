@@ -15,10 +15,11 @@ import android.os.Bundle;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.parse.Parse;
+import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.taxi.custom.CustomActivity;
 
@@ -42,7 +43,7 @@ public class NewPlacePopup extends CustomActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_place_popup);
 		context = this;
-		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
+//		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
 		
 		currentMember = ((Member) this.getApplication());
 		nUID = ((Member) this.getApplication()).ID.toString();
@@ -92,13 +93,13 @@ public class NewPlacePopup extends CustomActivity
 					Address add = list.get(0);
 					Double lat = add.getLatitude();
 					Double lng = add.getLongitude();
-					Place p = new Place(placename, placeaddress, placecity, ID);
-					p.setLat(lat);
-					p.setLng(lng);
+					Place p = new Place(placename, placeaddress, placecity, ID, String.valueOf(lat), String.valueOf(lng));
 					currentMember.addPlace(p);
 					
 					try {
 						new UpdatePlaceTask(lat, lng).execute().get();
+						InputMethodManager imm =(InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+						imm.hideSoftInputFromWindow(cityET.getWindowToken(),0);
 					} catch (InterruptedException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -108,7 +109,6 @@ public class NewPlacePopup extends CustomActivity
 					}
 					
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 		    }
@@ -147,32 +147,11 @@ public class NewPlacePopup extends CustomActivity
 	    	newPlace.put("uid", ID);
 	    	newPlace.put("latitude", latitude);
 	    	newPlace.put("longitude", longitude);
-	    	newPlace.saveInBackground();
-	    	
-	    	/*
-	    	String url = "http://rishinaik.com/familyLocator/insert_place.php";
-	    	ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
-
-		    param.add (new BasicNameValuePair("uid", uid));
-		    param.add (new BasicNameValuePair("name", placename));
-		    param.add (new BasicNameValuePair("street", placeaddress));
-		    param.add (new BasicNameValuePair("city", placecity));
-		    
-			JSONObject json = jsonParser.makeHttpRequest(url, "POST", param);
-			Log.d("Create Response", json.toString());
-			try {
-				int success = json.getInt("success");
-				if (success == 1) {
-					Log.d("JSON", "yeah, niga!");
-				} 
-				else {
-					Log.d("JSON", "you're fucked");
-				}
+	    	try {
+				newPlace.save();
+			} catch (ParseException e) {
+				e.printStackTrace();
 			}
-			catch (Exception e) {
-				Log.e("log_tag", "Error in http connection "+e.toString());
-			}
-			*/
 			if (progressDialog.isShowing()) {
 				progressDialog.dismiss();
 	        }
@@ -195,6 +174,8 @@ public class NewPlacePopup extends CustomActivity
 	public void onClick(View v)
 	{
 		super.onClick(v);
+		InputMethodManager imm =(InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+		imm.hideSoftInputFromWindow(cityET.getWindowToken(),0);
 		finish();
 	}
 }

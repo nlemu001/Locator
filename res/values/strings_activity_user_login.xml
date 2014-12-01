@@ -29,5 +29,9 @@
     <string name="error_nickname_toolong">Must be less than 12 characters</string>
     <string name="error_phoneNum_field_required">Phone # field is required</string>
     <string name="error_phoneNum_field_incorrect">Phone should be 10 digits (0-9 only)</string>
+    
+    <!-- MESSAGES STRINGS -->
+    <string name="error_message_is_empty">Cannot send an empty message</string>
+    <string name="error_message_user_doesnt_exist">That user does not exist</string>
 
 </resources>

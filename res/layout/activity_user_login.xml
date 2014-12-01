@@ -14,6 +14,15 @@
 	    	<ImageView
 		        android:layout_width="match_parent"
 		        android:layout_height="wrap_content"
+		        android:layout_marginTop="25dp"
+		        android:src="@drawable/title_login"
+		        android:adjustViewBounds="true"  
+		  		android:maxWidth="170dp"  
+		  		android:maxHeight="170dp" />
+	    	
+	    	<ImageView
+		        android:layout_width="match_parent"
+		        android:layout_height="wrap_content"
 		        android:src="@drawable/familylocatorlogo"
 		        android:adjustViewBounds="true"  
 		  		android:maxWidth="170dp"  

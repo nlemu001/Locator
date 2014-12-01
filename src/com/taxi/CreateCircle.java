@@ -50,7 +50,7 @@ public class CreateCircle extends Activity
 	
 	protected void onCreate(Bundle savedInstanceState)
 	{
-		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
+//		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.circle_create);
 		currentMember = ((Member) this.getApplication());

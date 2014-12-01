@@ -1,21 +1,12 @@
 package com.taxi;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONObject;
 
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnCancelListener;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.WindowManager;
@@ -24,7 +15,6 @@ import android.widget.EditText;
 import com.parse.ParseException;
 import com.parse.ParseObject;
 import com.parse.ParseQuery;
-import com.taxi.NewNnamePopup.UpdateUserTask;
 import com.taxi.custom.CustomActivity;
 
 // TODO: Auto-generated Javadoc

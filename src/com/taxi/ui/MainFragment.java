@@ -2,10 +2,14 @@ package com.taxi.ui;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import android.annotation.SuppressLint;
 import android.app.Fragment;
@@ -20,8 +24,10 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.location.Address;
 import android.location.Geocoder;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.SpannableString;
 import android.text.style.StyleSpan;
 import android.util.Log;
@@ -44,11 +50,11 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.parse.FindCallback;
-import com.parse.Parse;
-import com.parse.ParseException;
 import com.parse.ParseObject;
+import com.parse.ParsePush;
 import com.parse.ParseQuery;
+import com.parse.PushService;
+import com.taxi.MainActivity;
 import com.taxi.Member;
 import com.taxi.Place;
 import com.taxi.ProfileActivity;
@@ -64,12 +70,15 @@ public class MainFragment extends Fragment implements OnClickListener
 	private Member currentMember;
 	private Double mLat = 0.0;
 	private Double mLng = 0.0;
+	private boolean contactsDisplay;
+	private boolean placesDisplay;
 	
+	
+	@SuppressWarnings("deprecation")
 	@SuppressLint("InflateParams") @Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.main_container, null);
 		context = v.getContext ();
-		Parse.initialize(context, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
 		
 		try {
 			initMap(v, savedInstanceState);
@@ -77,23 +86,48 @@ public class MainFragment extends Fragment implements OnClickListener
 			e.printStackTrace ();
 		}
 		currentMember = ((Member) getActivity().getApplication());
-
-		try{
-			new GetDisplayDataTask ().execute ().get ();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 		
-		try{
+		try {
+        	new GetDisplayDataTask ().execute ().get ();
 			new GetPlacesDataTask (currentMember.getID()).execute ().get ();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+			new CalculateLocationTask().execute().get();
+        } catch (Exception e) {
+        	Log.d("error", e.toString());
+        }
+		contactsDisplay = false;
+		placesDisplay = true;
+		PushService.setDefaultPushCallback(this.getActivity(), MainActivity.class);
+		ParsePush.subscribeInBackground(currentMember.getNickname());
 		
 		initButtons (v);
+		
 		return v;
 	}
+	
+	public void callAsynchronousTask() {
+	    final Handler handler = new Handler();
+	    Timer timer = new Timer();
+	    TimerTask doAsynchronousTask = new TimerTask() {       
+	        @Override
+	        public void run() {
+	            handler.post(new Runnable() {
+	                public void run() { 
+	                	Log.d("test >.<", "run!!");
+	                    try {
+	                    	new GetDisplayDataTask ().execute ().get ();
+	            			new GetPlacesDataTask (currentMember.getID()).execute ().get ();
+	            			new CalculateLocationTask().execute().get();
+	                    } catch (Exception e) {
+	                    	Log.d("error", e.toString());
+	                    }
+	                }
+	            });
+	        }
+	    };
+	    timer.schedule(doAsynchronousTask, 0, 10000); 
+	}
 
+	
 	private void initButtons(View v) {
 		View b = v.findViewById(R.id.btnCheckin);
 		b.setOnTouchListener(CustomActivity.TOUCH);
@@ -121,15 +155,12 @@ public class MainFragment extends Fragment implements OnClickListener
 		Integer uid = id;
 		HashMap<String, Object> map = currentMember.getDisplay (id);
 		if (id.equals (currentMember.getID ())){
-			Log.d("test--", "am user" );
 			latitude =  Double.valueOf((String) map.get ("lat"));
 			longitude = Double.valueOf((String) map.get ("lng"));
-			Log.d("test--", (String) map.get ("lat"));
 			mLat = latitude;
 			mLng = longitude;
 			nname = currentMember.getNickname();
 		} else if (currentMember.inDisplay (id)) {
-			Log.d("test--", "am NOT user" );
 			nname = (String) map.get ("nickname");
 			latitude = Double.valueOf((String) map.get ("lat"));
 			longitude = Double.valueOf((String) map.get ("lng"));
@@ -172,8 +203,8 @@ public class MainFragment extends Fragment implements OnClickListener
 
 		map.put ("marker", options);
 		map.put ("uid", uid);
-		map.put ("lat", lat);
-		map.put ("lng", lng);
+		map.put ("lat", String.valueOf(lat));
+		map.put ("lng", String.valueOf(lng));
 		map.put ("nickname", nname);
 
 		currentMember.addDisplay (uid, map);
@@ -182,7 +213,6 @@ public class MainFragment extends Fragment implements OnClickListener
 	}
 
 	private void loadMarkers() {
-		mMap.clear ();
 		for (Integer i: currentMember.display.keySet()) {
 			try {
 				setupMapMarkers (i);
@@ -251,6 +281,7 @@ public class MainFragment extends Fragment implements OnClickListener
 				pd.setMessage("Loading...");
 				pd.show();
 			}
+			@Override
 			protected Bitmap doInBackground(String... urls) {
 				String urldisplay = urls[0];
 				Bitmap mIcon11 = null;
@@ -265,7 +296,8 @@ public class MainFragment extends Fragment implements OnClickListener
 				}
 				return mIcon11;
 			}
-
+			
+			@Override
 			protected void onPostExecute (Bitmap result) {
 				pd.dismiss ();
 			}
@@ -277,25 +309,16 @@ public class MainFragment extends Fragment implements OnClickListener
 		super.onResume();
 		mMapView.onResume();
 		mMap = mMapView.getMap();
-		try {
-			new GetDisplayDataTask ().execute ().get ();
-		} 
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+		callAsynchronousTask();
 		if (mMap != null) {
 			mMap.setInfoWindowAdapter (new CustomInfoWindowAdapter ());
 
 			mMap.clear();
 			currentMember.userNN = currentMember.getNickname();
-
 			try {
 				String user = currentMember.IDfromNickname(currentMember.userNN);
 				setupMapMarkers (Integer.valueOf(user));
-			} 
-			catch (IOException e) {
-				e.printStackTrace();
-			}
+			}catch (IOException e) {}
 			drawPlaces();
 		}
 	}
@@ -329,24 +352,53 @@ public class MainFragment extends Fragment implements OnClickListener
 	@Override
 	public void onClick(View v) {
 		if (v.getId() == R.id.btnPlaces) {
-			drawPlaces();
-		}
-		else if (v.getId() == R.id.btnLoc) {
+			if(placesDisplay){
+				placesDisplay = false;
+				mMap.clear();
+				if(contactsDisplay){
+					loadMarkers();
+				}else{
+					try {
+						String user = currentMember.IDfromNickname(currentMember.userNN);
+						setupMapMarkers (Integer.valueOf(user));
+					} catch(Exception e){}
+				}
+			}else{
+				placesDisplay = true;
+				drawPlaces();
+			}
 			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (new LatLng(mLat, mLng), 18));
 		}
-		else if (v.getId() == R.id.btnCheckin) {
-			try{
-				new GetDisplayDataTask ().execute ().get ();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			loadMarkers();
-			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (new LatLng(mLat, mLng), 8));
+		
+		else if (v.getId() == R.id.btnLoc) {
+			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (new LatLng(mLat, mLng), 20));
 		}
+		
+		else if (v.getId() == R.id.btnCheckin) {
+			if(contactsDisplay){
+				contactsDisplay = false;
+				mMap.clear();
+				try {
+					String user = currentMember.IDfromNickname(currentMember.userNN);
+					setupMapMarkers (Integer.valueOf(user));
+				} catch(Exception e){}
+				if(placesDisplay){
+					drawPlaces();
+				}
+
+			}else{
+				contactsDisplay = true;
+				loadMarkers();
+			}
+			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (new LatLng(mLat, mLng), 18));
+		}
+		
 	}
 
 	class GetDisplayDataTask extends AsyncTask<String, String, String> {
 		private ProgressDialog progressDialog = new ProgressDialog (context);
+		
+		@Override
 		protected void onPreExecute () {
 			progressDialog.setMessage ("Getting data");
 			progressDialog.show ();
@@ -362,6 +414,7 @@ public class MainFragment extends Fragment implements OnClickListener
 		protected String doInBackground (String... params) {
 			ParseQuery<ParseObject> inner = ParseQuery.getQuery("circles");
             inner.whereEqualTo("adminID", currentMember.getID());
+            inner.whereEqualTo("shareLocation", 0);
         	ParseQuery<ParseObject> outter = ParseQuery.getQuery("users");
         	outter.whereMatchesKeyInQuery("uid", "membersID", inner);
         	List<ParseObject> result = null;
@@ -371,15 +424,14 @@ public class MainFragment extends Fragment implements OnClickListener
                 e1.printStackTrace();
             }
         	
-        	Log.d("test", result.size() + "");
         	if (result.size() != 0){
+        		currentMember.clearDisplay();
         		for (ParseObject o : result) {
         			HashMap<String, Object> map = new HashMap<String, Object>();
         			Integer id = o.getInt ("uid");
         			String nname = o.getString ("nickname");
         			String lat = o.getString ("latitude");
         			String lng = o.getString ("longitude");
-        			Log.d("test", id + " " + nname+ " " + lat + " " + lng);
         			map.put ("uid", id);
         			map.put ("lat", lat);
         			map.put ("lng", lng);
@@ -387,7 +439,6 @@ public class MainFragment extends Fragment implements OnClickListener
         			currentMember.addDisplay (id, map);
         		}
         	} else {
-        		Log.d("test>cheching ID", currentMember.getID() + "");
         		ParseQuery<ParseObject> q = ParseQuery.getQuery("users");
                 q.whereEqualTo("uid", currentMember.getID());
                 List<ParseObject> result2 = null;
@@ -401,7 +452,6 @@ public class MainFragment extends Fragment implements OnClickListener
     			String nname = result2.get(0).getString ("nickname");
     			String lat = result2.get(0).getString ("latitude");
     			String lng = result2.get(0).getString ("longitude");
-    			Log.d("test>adding user", id + " " + nname+ " " + lat + " " + lng);
     			map.put ("uid", id);
     			map.put ("lat", lat);
     			map.put ("lng", lng);
@@ -414,7 +464,8 @@ public class MainFragment extends Fragment implements OnClickListener
 			return null;
 		}
 
-		protected void onPostExecute (Void v) {
+		@Override
+		protected void onPostExecute (String v) {
 			if (progressDialog.isShowing ()) {
 				progressDialog.dismiss ();
 			}
@@ -425,6 +476,8 @@ public class MainFragment extends Fragment implements OnClickListener
 		ArrayList<Place> places = currentMember.getPlaces();
 		Log.d("PLACE", String.valueOf(places.size()));
 		Geocoder gc = new Geocoder(context);
+		if(places.size() > 0)
+			currentMember.clearShape();
 		for (Place p : places) {
 			Double lat =  null;
 			Double lng = null;
@@ -444,9 +497,91 @@ public class MainFragment extends Fragment implements OnClickListener
 				.fillColor(0x330000FF)
 				.strokeColor(Color.BLUE)
 				.strokeWidth(3);
-			mMap.addCircle(options);
+			currentMember.addShape(mMap.addCircle(options));
+		}
+		
+	}
+	
+	private class CalculateLocationTask extends AsyncTask<String, String, String> {
+		private ProgressDialog progressDialog = new ProgressDialog (context);
+
+		@Override
+		protected void onPreExecute () {
+			progressDialog.setMessage ("Getting data");
+			progressDialog.show ();
+			progressDialog.setOnCancelListener (new OnCancelListener () {
+				@Override
+				public void onCancel (DialogInterface arg0) {
+					CalculateLocationTask.this.cancel (true);
+				}
+			});
+		}       
+
+		@SuppressLint({ "UseSparseArrays", "SimpleDateFormat" }) @Override
+		protected String doInBackground (String... params) {
+			ArrayList<Place> places = currentMember.getPlaces();
+			HashMap<Integer, HashMap<String, Object>> contacts = currentMember.getDisplay();
+			for (Integer i : contacts.keySet()) {
+				HashMap<String, Object> user = contacts.get(i);
+				String nickname = (String) user.get("nickname");
+				if(!(nickname.equals(currentMember.getNickname()))){
+					Double latA = Double.valueOf((String) user.get("lat"));
+					Double lngA = Double.valueOf((String) user.get("lng"));
+					Location usrLoc = new Location(nickname);
+					usrLoc.setLatitude(latA);
+					usrLoc.setLongitude(lngA);
+					for (Place place : places) {
+						Double latB = place.getLat();
+						Double lngB = place.getLng();
+						Location placeLoc = new Location(place.getName());
+						placeLoc.setLatitude(latB);
+						placeLoc.setLongitude(lngB);
+						double res = usrLoc.distanceTo(placeLoc);
+						Integer usr = (Integer) user.get("uid");
+						Calendar c = Calendar.getInstance();
+						SimpleDateFormat sdf = new SimpleDateFormat("h:mm a");
+						String strDate = sdf.format(c.getTime());
+						String name = place.getName();
+						if(!currentMember.containsNotification(usr, name)){
+							if(res > 50){
+								currentMember.setNotification(usr, name, false);
+							}else{
+								currentMember.setNotification(usr, name, true);
+							}
+						}else if(res > 50){
+							if(currentMember.checkNotification(usr, name)){
+								currentMember.toggleNotification(usr, name);
+								ParsePush push = new ParsePush();
+								push.setChannel(currentMember.getNickname());
+								push.setMessage(nickname + " left " + place.getName() + " at " + strDate);
+								push.sendInBackground();
+							}
+						}else {
+							if(!currentMember.checkNotification(usr, name)){
+								currentMember.toggleNotification(usr, name);
+								ParsePush push = new ParsePush();
+								push.setChannel(currentMember.getNickname());
+								push.setMessage(nickname + " arrived at " + place.getName() + " at " + strDate);
+								push.sendInBackground();
+							}
+						}
+					}
+				}
+			}
+			if (progressDialog.isShowing ()) {
+				progressDialog.dismiss ();
+			}
+			return null;
+		}
+		
+		@Override
+		protected void onPostExecute (String arg0) {
+			if (progressDialog.isShowing ()) {
+				progressDialog.dismiss ();
+			}
 		}
 	}
+
 	
 	class GetPlacesDataTask extends AsyncTask<String, String, String> {
 		private ProgressDialog progressDialog = new ProgressDialog (context);
@@ -456,6 +591,7 @@ public class MainFragment extends Fragment implements OnClickListener
 			this.UID = id;
 		}
 
+		@Override
 		protected void onPreExecute () {
 			progressDialog.setMessage ("Getting data");
 			progressDialog.show ();
@@ -471,21 +607,19 @@ public class MainFragment extends Fragment implements OnClickListener
 		protected String doInBackground (String... params) {			
 			ParseQuery<ParseObject> query = ParseQuery.getQuery("places");
 			query.whereEqualTo("uid", UID);
-			query.findInBackground(new FindCallback<ParseObject>() {
-				public void done(List<ParseObject> placesList, ParseException e) {
-			        if (e != null) {
-			        	Log.d("score", "Error: " + e.getMessage());
-			        }
-			        else{
-			        	currentMember.clearPlaces();
-			        	for (int i = 0; i < placesList.size(); i++) {
-							currentMember.addPlace(placesList.get(i).getString("name"), 
-												   placesList.get(i).getString("street"), 
-												   placesList.get(i).getString("city"));
-						}
-			        }
-			    }
-			});
+			List<ParseObject> placesList = null;
+			try{
+				placesList = query.find();
+				currentMember.clearPlaces();
+				for (int i = 0; i < placesList.size(); i++) {
+					currentMember.addPlace(placesList.get(i).getString("name"), 
+							placesList.get(i).getString("street"), 
+							placesList.get(i).getString("city"), 
+							placesList.get(i).getString("latitude"), 
+							placesList.get(i).getString("longitude"));
+				}
+			}catch (Exception e){
+			}
 
 			if (progressDialog.isShowing ()) {
 				progressDialog.dismiss ();
@@ -493,7 +627,8 @@ public class MainFragment extends Fragment implements OnClickListener
 			return null;
 		}
 
-		protected void onPostExecute (Void v) {
+		@Override
+		protected void onPostExecute (String arg0) {
 			if (progressDialog.isShowing ()) {
 				progressDialog.dismiss ();
 			}

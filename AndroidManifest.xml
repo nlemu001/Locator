@@ -90,7 +90,9 @@
         
         <activity
         	android:name="com.taxi.CirclesActivity"
-        	android:parentActivityName="com.taxi.MainActivity" >
+        	android:parentActivityName="com.taxi.MainActivity" 
+        	android:theme="@android:style/Theme.Holo"
+        	android:screenOrientation="portrait">
         	<meta-data
             	android:name="android.support.PARENT_ACTIVITY"
             	android:value="com.taxi.CirclesActivity" />
@@ -98,7 +100,9 @@
     
 		<activity
 	        android:name="com.taxi.CreateCircle"
-	        android:parentActivityName="com.taxi.CirclesActivity" >
+	        android:parentActivityName="com.taxi.CirclesActivity" 
+	        android:theme="@android:style/Theme.Holo"
+        	android:screenOrientation="portrait">
 	        <meta-data
 	            android:name="android.support.PARENT_ACTIVITY"
 	            android:value="com.taxi.CirclesActivity" />
@@ -106,7 +110,9 @@
 
 		<activity
         	android:name="com.taxi.CircleMembers"
-        	android:parentActivityName="com.taxi.CirclesActivity" >
+        	android:parentActivityName="com.taxi.CirclesActivity" 
+        	android:theme="@android:style/Theme.Holo"
+        	android:screenOrientation="portrait">
         	<meta-data
 				android:name="android.support.PARENT_ACTIVITY"
            	 	android:value="com.taxi.CircleMembers" /> 
@@ -183,12 +189,60 @@
     	</activity>
     	
     	<activity
+        	android:name="com.taxi.parseRemoveMemberFromCircle"
+        	android:parentActivityName="com.taxi.CirclesActivity" >
+        	<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+           	 	android:value="com.taxi.CircleMembers" /> 
+        </activity>
+        
+		<activity
+        	android:name="com.taxi.parseAddMemberToCircle"
+        	android:parentActivityName="com.taxi.CirclesActivity" >
+        	<meta-data
+				android:name="android.support.PARENT_ACTIVITY"
+           	 	android:value="com.taxi.CircleMembers" /> 
+        </activity>
+    	
+    	<activity
         	android:name=".NewPhonePopup"
         	android:screenOrientation="portrait"
         	android:theme="@style/Theme.CustomDialog"
         	android:windowSoftInputMode="stateHidden" >
     	</activity>
         
+    	<activity
+        android:name="com.taxi.MessageSendActivity"
+        android:label="@string/profile"
+        android:parentActivityName="com.taxi.MainActivity" 
+        android:theme="@android:style/Theme.Holo">
+        <meta-data
+            android:name="android.support.PARENT_ACTIVITY"
+            android:value="com.taxi.MainActivity" />
+    	</activity>
+    	
+    	<activity
+            android:name=".MessageViewConversation"
+            android:label="@string/profile"
+            android:parentActivityName=".MainActivity" 
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Holo">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.taxi.MainActivity" />
+        </activity>
+        
+          <activity
+            android:name=".MessageInbox"
+            android:label="@string/profile"
+            android:parentActivityName=".MainActivity" 
+            android:screenOrientation="portrait"
+            android:theme="@android:style/Theme.Holo">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.taxi.MainActivity" />
+        </activity>
+    	
         <service
             android:name=".NetworkService"
             android:exported="false" />
@@ -198,30 +252,10 @@
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version" />
 
-        <!-- Maps API key RISHI-->
-<!--         <meta-data
-            android:name="com.google.android.maps.v2.API_KEY"
-            android:value="AIzaSyC32QZemxnVpdXRacqo69k6XEcPGiT-Y5g" /> -->
-        
-         <!-- Maps API key JOE-->
-<!--         <meta-data -->
-<!--             android:name="com.google.android.maps.v2.API_KEY" -->
-<!--             android:value="AIzaSyAStuEgshN6VElKcYjJeADKIBTTLw-oK5Mg" /> -->
-        
-         <!-- Maps API key JORDAN-->
-<!--         <meta-data -->
-<!--             android:name="com.google.android.maps.v2.API_KEY" -->
-<!--             android:value="AIzaSyBlKR_rG<ADD DASH DASH HERE>IROcr8K3rxWmZhR9OQi4a8KQ" /> -->
-        
-         <!-- Maps API key NERI-->
-         <meta-data
-             android:name="com.google.android.maps.v2.API_KEY"
-             android:value="AIzaSyCb0FspqksQxk67h-v9v8AdUUMkIiGeg0c" />
-        
          <!-- Maps API key CHRISTIAN-->
-<!--         <meta-data -->
-<!--             android:name="com.google.android.maps.v2.API_KEY" -->
-<!--             android:value="AIzaSyB_wp_ErF74JpZpT6quA1819hKFKb94f_Q" /> -->
+         <meta-data 
+             android:name="com.google.android.maps.v2.API_KEY" 
+             android:value="AIzaSyB_wp_ErF74JpZpT6quA1819hKFKb94f_Q" /> 
 
 			<service android:name="com.parse.PushService" />
 		<receiver android:name="com.parse.ParseBroadcastReceiver">

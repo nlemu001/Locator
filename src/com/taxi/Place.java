@@ -29,6 +29,15 @@ public class Place {
 		lng = "0";
 	}
 	
+	public Place(String n, String s, String c, Integer u, String la, String ln){
+		name = n;
+		street = s;
+		city = c;
+		uid = u;
+		lat = la;
+		lng = ln;
+	}
+	
 	public void setName(String n){
 		name = n;
 	}

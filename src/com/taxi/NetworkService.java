@@ -18,10 +18,7 @@ package com.taxi;
 import android.app.IntentService;
 import android.content.Intent;
 import android.net.Uri;
-import android.widget.Toast;
 
-import com.taxi.Util;
-import com.taxi.UploadModel;
 import com.amazonaws.mobileconnectors.s3.transfermanager.TransferManager;
 
 /*

@@ -15,6 +15,12 @@
 
 package com.taxi;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Locale;
+
 import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -23,23 +29,12 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
-import android.widget.Toast;
 
-import com.taxi.Constants;
-import com.taxi.Util;
-import com.amazonaws.services.s3.model.ProgressEvent;
-import com.amazonaws.services.s3.model.ProgressListener;
-import com.amazonaws.mobileconnectors.s3.transfermanager.PersistableUpload;
 import com.amazonaws.mobileconnectors.s3.transfermanager.Transfer;
 import com.amazonaws.mobileconnectors.s3.transfermanager.TransferManager;
 import com.amazonaws.mobileconnectors.s3.transfermanager.Upload;
-import com.amazonaws.mobileconnectors.s3.transfermanager.exception.PauseException;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.Locale;
+import com.amazonaws.services.s3.model.ProgressEvent;
+import com.amazonaws.services.s3.model.ProgressListener;
 
 /* UploadModel handles the interaction between the Upload and TransferManager.
  * This also makes sure that the file that is uploaded has the same file extension
@@ -51,11 +46,11 @@ import java.util.Locale;
  *
  * You can easily avoid this by directly using an InputStream instead of a Uri.
  */
+@SuppressWarnings("deprecation")
 public class UploadModel extends TransferModel {
     private static final String TAG = "UploadModel";
 
     private Upload mUpload;
-    private PersistableUpload mPersistableUpload;
     private ProgressListener mListener;
     private Status mStatus;
     private File mFile;

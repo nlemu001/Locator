@@ -1,6 +1,5 @@
 package com.taxi;
 import java.io.InputStream;
-import java.util.Timer;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -15,25 +14,20 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.amazonaws.mobileconnectors.s3.transfermanager.Upload;
-import com.amazonaws.services.s3.AmazonS3Client;
-
 public class ProfileActivity extends Activity{
 	ProgressDialog pd;
-	private Timer mTimer;
 	private boolean exists = false;
 	private boolean checked = false;
-	private Upload mUpload;
-	private LinearLayout mLayout;
-	private TransferModel[] mModels = new TransferModel[0];
 	Integer UID;
 	String uname;
 	String nname;
 	String phonenum;
+	Boolean uploadedNewImage = false;
+	
+	ImageView bmImage;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState)
@@ -47,11 +41,11 @@ public class ProfileActivity extends Activity{
 		new DisplayImageFromURL((ImageView) findViewById(R.id.imageView1))
         .execute("https://s3-us-west-1.amazonaws.com/familylocatorprofile/" + UID + ".jpeg");
 		
-		TextView tv2 = (TextView) findViewById(R.id.textView2);
-		tv2.setText(uname);
-		
 		TextView tv3 = (TextView) findViewById(R.id.textView3);
 		tv3.setText(nname);
+		
+		TextView tv2 = (TextView) findViewById(R.id.textView2);
+		tv2.setText(uname);
 		
 		TextView tv4 = (TextView) findViewById(R.id.phonetextview);
 		tv4.setText(phonenum);
@@ -97,6 +91,7 @@ public class ProfileActivity extends Activity{
             }
         });
         
+        
         new CheckBucketExists().execute();
 	}
 	
@@ -105,15 +100,23 @@ public class ProfileActivity extends Activity{
      * image/video
      */
     @Override
-    protected void onActivityResult(int reqCode, int resCode, Intent data) {
-        if (resCode == Activity.RESULT_OK && data != null) {
+    protected void onActivityResult(int reqCode, int resCode, Intent data) 
+    {
+        if (resCode == Activity.RESULT_OK && data != null) 
+        {
             Uri uri = data.getData();
             if (uri != null) {
                 TransferController.upload(this, uri);
-                Toast msg = Toast.makeText(ProfileActivity.this, "Uploading...", Toast.LENGTH_LONG);
+                
+                //----------- PLEASE DO NOT REMOVE THIS TOAST BELOW WHILE CLEANINF UP OTHER UNNEEDED TOASTS -----------------
+                Toast msg = Toast.makeText(ProfileActivity.this, "Profile has been updated", Toast.LENGTH_LONG);
                 msg.show();
+                Intent returnToHome = new Intent (this, MainActivity.class);
+                startActivity(returnToHome);
+                finish();
             }
         }
+        
     }
     
     
@@ -157,7 +160,7 @@ public class ProfileActivity extends Activity{
 
 	        @Override
 	        protected Boolean doInBackground(Object... params) {
-	            AmazonS3Client sS3Client = Util.getS3Client(getApplicationContext());
+	            Util.getS3Client(getApplicationContext());
 	            return Util.doesBucketExist();
 	        }
 

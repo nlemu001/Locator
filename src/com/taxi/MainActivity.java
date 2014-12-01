@@ -5,12 +5,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
 import android.annotation.SuppressLint;
 import android.app.ActionBar;
 import android.app.ProgressDialog;
@@ -45,12 +39,9 @@ import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.location.LocationClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
-import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseObject;
-import com.parse.ParsePush;
 import com.parse.ParseQuery;
-import com.parse.PushService;
 import com.taxi.custom.CustomActivity;
 import com.taxi.model.Feed;
 import com.taxi.ui.LeftNavAdapter;
@@ -76,22 +67,15 @@ LocationListener {
 	protected void onCreate (Bundle savedInstanceState) {
 		super.onCreate (savedInstanceState);
 		setContentView (R.layout.activity_main);
-		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
-		//PushService.setDefaultPushCallback(this, MainActivity.class);
 		currentMember = (Member) this.getApplication ();
 		UID = currentMember.getID ();
 		uname = currentMember.getUsername ();
 		nname = currentMember.getNickname ();
 		mLocationClient = new LocationClient(this, this, this);
-		//ParsePush.subscribeInBackground(uname);
 		setupActionBar ();
 		setupDrawer ();
 		setupContainer ();
 		
-		//ParsePush push = new ParsePush();
-		//push.setChannel(uname);
-	//	push.setMessage("onCreate finished");
-		//push.sendInBackground();
 	}
 
 	protected void setupActionBar () {
@@ -180,7 +164,7 @@ LocationListener {
 					startActivity(i);
 				}
 				else if(arg2 == 2) {
-					Intent i = new Intent(context, MessageActivity.class);
+					Intent i = new Intent(context, MessageSendActivity.class);
 					startActivity(i);
 				}
 				else if(arg2 == 3) {
@@ -265,6 +249,7 @@ LocationListener {
 			query.whereEqualTo("membersID", currentMember.getID());
         	ParseQuery<ParseObject> query2 = ParseQuery.getQuery("circles");
         	query2.whereMatchesKeyInQuery("adminID", "adminID", query);
+        	query2.whereMatchesKeyInQuery("cname", "cname", query);
         	ParseQuery<ParseObject> query3 = ParseQuery.getQuery("users");
         	query3.whereMatchesKeyInQuery("uid", "membersID", query2);
         	List<ParseObject> result = null;
@@ -275,8 +260,6 @@ LocationListener {
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
-        	Log.d("test>", "1size="+result.size());
-        	Log.d("test>", "2size="+result2.size());
         	HashMap<Integer, HashMap<String, String>> users = new HashMap<Integer, HashMap<String, String>>();
         	for (ParseObject o : result2) {
         		HashMap<String, String> map = new HashMap<String, String>();
@@ -286,7 +269,6 @@ LocationListener {
         		map.put("nickname", o.getString ("nickname"));
         		users.put(o.getInt("uid"), map);
         	}
-        	Log.d("test>>", users.toString());
      	
         	for (ParseObject o : result) {
         		Integer admin = o.getInt ("adminID");
@@ -389,8 +371,8 @@ LocationListener {
 	private void requestLocationUpdates() {
 		LocationRequest request = LocationRequest.create();
 		request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-		request.setInterval(20000);
-		request.setFastestInterval(15000);
+		request.setInterval(10000);
+		request.setFastestInterval(8000);
 		mLocationClient.requestLocationUpdates(request, this);
 	}
 
@@ -471,27 +453,7 @@ LocationListener {
 			} catch (ParseException e1) {
 				e1.printStackTrace();
 			}
-			
-			/*
-			String url = "http://rishinaik.com/familyLocator/update_location.php";
-
-			HttpClient httpClient = new DefaultHttpClient();
-			HttpPost httpPost = new HttpPost(url);
-			ArrayList<NameValuePair> param = new ArrayList<NameValuePair>();
-
-			param.add (new BasicNameValuePair("uid", UID));
-			param.add (new BasicNameValuePair("lat", lat));
-			param.add (new BasicNameValuePair("lng", lng));
-
-			try {
-				httpPost.setEntity(new UrlEncodedFormEntity(param));
-				HttpResponse httpResponse = httpClient.execute(httpPost);
-				HttpEntity httpEntity = httpResponse.getEntity();
-				is =  httpEntity.getContent();					
-			}
-			catch (Exception e) {
-				Log.e("UpdateLocationTask", "Error in http connection "+e.toString());
-			}*/			  
+				  
 			return null;
 		}
 

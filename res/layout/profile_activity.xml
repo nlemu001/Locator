@@ -7,69 +7,74 @@
         android:id="@+id/imageView1"
         android:layout_width="100dp"
         android:layout_height="100dp"
-        android:layout_alignParentRight="true"
+        android:scaleType="fitXY"
+        android:layout_centerHorizontal="true"
         android:layout_alignParentTop="true"
         android:contentDescription="@string/profile_image"
-        android:src="@drawable/default_picture" />
+        android:src="@drawable/default_picture"
+        android:layout_marginTop="20dp" />
     
     <Button
         android:id="@+id/browse"
-        android:layout_width="154dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentRight="true"
-        android:layout_alignTop="@+id/updatePass"
-        android:text="@string/upload_photo" />
+        android:text="@string/upload_photo"
+        android:layout_below="@+id/phonetextview"
+        android:layout_marginTop="12dp"/>
 
     <Button
         android:id="@+id/updateNickname"
-        android:layout_width="153dp"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_below="@+id/updatePass"
-        android:layout_marginTop="19dp"
+        android:layout_below="@+id/browse"
+        android:layout_marginTop="10dp"
         android:text="@string/update_nickname" />
 
-	 <TextView
-	     android:id="@+id/textView2"
-	     android:layout_width="wrap_content"
-	     android:layout_height="wrap_content"
-	     android:layout_alignParentLeft="true"
-	     android:layout_alignParentTop="true"
-	     android:layout_marginLeft="17dp"
-	     android:layout_marginTop="18dp"
-	     android:text="@string/name_" />
+	 
 
 	 <TextView
 	     android:id="@+id/textView3"
 	     android:layout_width="wrap_content"
 	     android:layout_height="wrap_content"
-	     android:layout_alignLeft="@+id/textView2"
-	     android:layout_below="@+id/textView2"
-	     android:text="@string/nickname_str" />
+	     android:text="@string/nickname_str" 
+	     android:layout_centerHorizontal="true"
+	     android:layout_marginTop="20dp"
+	     android:textSize="25dp"
+	     android:layout_below="@+id/imageView1"/>
 
+	 <TextView
+	     android:id="@+id/textView2"
+	     android:layout_width="wrap_content"
+	     android:layout_height="wrap_content"
+	     android:layout_marginTop="18dp"
+	     android:text="@string/name_" 
+	     android:layout_below="@+id/textView3"
+	     android:textSize="20dp"
+	     android:layout_centerHorizontal="true"/>
+	 
 	 <Button
 	     android:id="@+id/updatePass"
-	     android:layout_width="153dp"
+	     android:layout_width="match_parent"
 	     android:layout_height="wrap_content"
-	     android:layout_alignParentLeft="true"
-	     android:layout_below="@+id/imageView1"
-	     android:layout_marginTop="51dp"
+	     android:layout_below="@+id/phoneButton"
+	     android:layout_marginTop="10dp"
 	     android:text="@string/update_password" />
 
 	 <TextView
 	     android:id="@+id/phonetextview"
 	     android:layout_width="wrap_content"
 	     android:layout_height="wrap_content"
-	     android:layout_alignLeft="@+id/textView3"
-	     android:layout_below="@+id/textView3"
-	     android:text="No phone #" />
+	     android:layout_below="@+id/textView2"
+	     android:text="No phone #" 
+	     android:textSize="20dp"
+	     android:layout_centerHorizontal="true"/>
 
 	 <Button
 	     android:id="@+id/phoneButton"
-	     android:layout_width="wrap_content"
+	     android:layout_width="match_parent"
 	     android:layout_height="wrap_content"
-	     android:layout_alignLeft="@+id/browse"
-	     android:layout_alignTop="@+id/updateNickname"
-	     android:text="Update Phone Number" />
+	     android:text="Update Phone Number" 
+	     android:layout_below="@+id/updateNickname"
+	     android:layout_marginTop="10dp"/>
 	 
 </RelativeLayout>

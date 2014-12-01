@@ -1,9 +1,11 @@
 package com.taxi;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -17,16 +19,23 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.ParseQuery;
+
 public class CirclesActivity extends Activity 
 {
 	Member currentUser;
+	Context context = this;
 	
 	protected void onCreate(Bundle savedInstanceState)
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.circles_layout);
 		
-		getActionBar().setDisplayHomeAsUpEnabled(true);
+		setTitle("Circles You Are In");
+		
+		//getActionBar().setDisplayHomeAsUpEnabled(true);
 		
 		final Button button = (Button)findViewById(R.id.button1);
 		button.setOnClickListener(new OnClickListener() 
@@ -61,8 +70,12 @@ public class CirclesActivity extends Activity
 				Toast.makeText(getApplicationContext(),
 						"Position: " + itemPos + " Name: " + itemVal,
 						Toast.LENGTH_SHORT).show();
-				currentUser.user = -1;
+				//currentUser.user = -1;
+				
+				ArrayList <Circle> userCircles = currentUser.getCircleList();
+				final Circle currentCircle = userCircles.get(position);
 				Intent intent = new Intent(CirclesActivity.this, CircleMembers.class);
+				intent.putExtra("cname", currentCircle.getCircleName());
 				startActivity (intent);
 				finish();
 			}
@@ -80,9 +93,10 @@ public class CirclesActivity extends Activity
 						"Add Contact to Circle",
 						"Remove Contact from Circle",
 						"Share My Location",
-						"Do NOT Share My Location"
+						"Do NOT Share My Location",
+						"Message Entire Circle"
 					};
-				
+				currentUser.circle = pos;
 				ArrayList <Circle> userCircles = currentUser.getCircleList();
 				final Circle currentCircle = userCircles.get(pos);
 				Log.d("CIRCLE ADMIN", currentUser.ID.toString() + "     "+currentCircle.getCircleAdmin());
@@ -93,6 +107,21 @@ public class CirclesActivity extends Activity
 					@Override
 					public void onClick(DialogInterface dialog, int choice) 	
 					{
+						ParseQuery<ParseObject> queryShareLoc = ParseQuery.getQuery("circles");
+						queryShareLoc.whereEqualTo("membersID", currentUser.ID);
+						queryShareLoc.whereEqualTo("cname", currentCircle.getCircleName());
+						List<ParseObject> usersListShareLoc = null;
+						try 
+						{
+							usersListShareLoc = queryShareLoc.find();
+						} 
+						catch (ParseException e) 
+						{
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						
 						if(currentCircle.getCircleAdmin() == currentUser.ID)
 						{
 							Log.d("ADMIN", "user is admin");
@@ -100,25 +129,54 @@ public class CirclesActivity extends Activity
 							if(choice == 0)
 							{
 								Log.d("POS 0", "IN IF");
-								Intent intent = new Intent(CirclesActivity.this, CircleAddMember.class);
+								Intent intent = new Intent(CirclesActivity.this, parseAddMemberToCircle.class);
 								intent.putExtra("cname", currentCircle.getCircleName());
 								startActivity (intent);
+								finish();
 							}
 							else  if(choice == 1)
 							{
 								Log.d("POS 1", "IN IF");
-								Intent intent = new Intent(CirclesActivity.this, CircleRemoveMember.class);
+								Intent intent = new Intent(CirclesActivity.this, parseRemoveMemberFromCircle.class);
 								intent.putExtra("cname", currentCircle.getCircleName());
 								startActivity (intent);
+								finish();
 							}
 						}
 						if(choice == 2)
 						{
+							usersListShareLoc.get(0).put("shareLocation", 0);
+							try 
+							{
+								usersListShareLoc.get(0).save();
+							} 
+							catch (ParseException e) 
+							{
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 							Toast.makeText(getApplicationContext(), adminChoices[choice] +" with "+currentCircle.getCircleName(), Toast.LENGTH_SHORT).show();
 						}
 						else if(choice == 3)
 						{
+							usersListShareLoc.get(0).put("shareLocation", 1);
+							try 
+							{
+								usersListShareLoc.get(0).save();
+							} 
+							catch (ParseException e) 
+							{
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
 							Toast.makeText(getApplicationContext(), adminChoices[choice]+" with "+ currentCircle.getCircleName(), Toast.LENGTH_SHORT).show();
+						}
+						else if(choice == 4)
+						{
+							Intent intent = new Intent(context, MessageSendActivity.class);
+							intent.putExtra("groupName", currentCircle.getCircleName());
+							startActivity(intent);
+							//Toast.makeText(getApplicationContext(), adminChoices[choice]+": " + currentCircle.getCircleName(), Toast.LENGTH_SHORT).show();
 						}
 					}
 				});

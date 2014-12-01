@@ -39,7 +39,7 @@ public class CreateNewAccountActivity extends Activity implements OnClickListene
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
-		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
+//		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_create_new_account);
 		
@@ -231,8 +231,8 @@ public class CreateNewAccountActivity extends Activity implements OnClickListene
 	                    newUser.put("password", newPasswordField.getText().toString());
 	                    newUser.put("phone", newPhonenumField.getText().toString());
 	                    newUser.put("uid", userID);
-	                    newUser.put("latitude", "0");
-	                    newUser.put("longitude", "0");
+	                    newUser.put("latitude", "33.971110");
+                        newUser.put("longitude", "-117.327896");
 	                    newUser.save();
 	                    processNewAccount = true;
 	                    

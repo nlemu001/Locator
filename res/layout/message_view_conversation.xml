@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+
+    
+	  <ListView
+	       android:id="@+id/conversationList"
+	       android:layout_width="wrap_content"
+	       android:layout_height="425dp"
+	       android:choiceMode="multipleChoice"
+	     
+	       android:layout_marginBottom="50dp">
+	   </ListView>
+   
+   <LinearLayout
+		        android:orientation="horizontal"
+		        android:layout_width="fill_parent"
+		        android:layout_height="wrap_content"
+		        android:layout_alignParentBottom="true">
+        
+             	<EditText
+         			android:id="@+id/sendMessage"
+         			android:layout_width="250dp"
+         			android:layout_height="30dp"
+         			android:inputType="textMultiLine"
+        			android:hint="Enter Message"
+        			android:layout_toLeftOf="@+id/view"
+        			android:background="#FFFFFF"
+        			android:textColor="#000000"/>
+
+			    <Button
+			        android:id="@+id/sendButton"
+					style="?android:textAppearanceSmall"
+					android:layout_width="100dp"
+					android:layout_height="wrap_content"
+					android:text="Send"
+					android:layout_toRightOf="@+id/view"/>
+			    
+    		</LinearLayout>
+
+</RelativeLayout>

@@ -3,9 +3,11 @@ package com.taxi;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import android.annotation.SuppressLint;
 import android.app.Application;
 import android.util.Log;
+
+import com.parse.Parse;
+import com.parse.PushService;
 
 public class Member extends Application {
 	public Integer ID;
@@ -15,14 +17,24 @@ public class Member extends Application {
 	public String email;
 	public String phone_num;
 
-	@SuppressLint("UseSparseArrays") 
 	public HashMap<Integer, HashMap<String, Object>> display = new HashMap<Integer, HashMap<String, Object>>();
 	public ArrayList <Circle> circles = new ArrayList <Circle> ();
 	private ArrayList<Place> userPlaces = new ArrayList<Place>();
+	private HashMap<Integer, HashMap<String,Boolean>> notify = new HashMap<Integer, HashMap<String, Boolean>>();
+	
+	public ArrayList<com.google.android.gms.maps.model.Circle> shapes = new ArrayList<com.google.android.gms.maps.model.Circle>();
 	public int circle = -1;
 	public int user = -1;
 	public String userNN = "";
-
+	
+	@SuppressWarnings("deprecation")
+	@Override
+    public void onCreate() {
+        super.onCreate();
+        Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
+        PushService.setDefaultPushCallback (this, MainActivity.class);
+    }
+	
 	public Member () {
 		this.nickname = "nick";
 		this.email = "test@taxi.com";
@@ -36,6 +48,33 @@ public class Member extends Application {
 		this.password = password;
 		this.phone_num = phone;
 
+	}
+	
+	public boolean containsNotification (Integer usr, String name) {
+		if(notify.containsKey(usr)){
+			HashMap<String, Boolean> map = notify.get(usr);
+			return (map.containsKey(name)) ? true : false;
+		}
+		return false;
+	}
+	
+	public void setNotification (Integer usr, String name, boolean val) {
+		if(notify.containsKey(usr)){
+			notify.get(usr).put(name, val);
+		}else{
+			HashMap<String, Boolean> map = new HashMap<String, Boolean>();
+			map.put(name, val);
+			notify.put(usr, map);
+		}
+	}
+	
+	public void toggleNotification (Integer usr, String name) {
+		boolean current = notify.get(usr).get(name);
+		notify.get(usr).put(name, !current);
+	}
+	
+	public boolean checkNotification (Integer usr, String name) {
+		return notify.get(usr).get(name);
 	}
 	
 	public HashMap<String, Object> CurrentData () {
@@ -54,15 +93,23 @@ public class Member extends Application {
 		return  String.valueOf(ID);
 	}
 	
+	public HashMap<Integer, HashMap<String, Object>> getDisplay() {
+		return display;
+	}
+	
 	public void updateDisplay (Integer key, Double lat, Double lng) {
-		display.get(key).put("lat", lat);
-		display.get(key).put("lng", lng);
+		display.get(key).put("lat", String.valueOf(lat));
+		display.get(key).put("lng", String.valueOf(lng));
 	}
 	
 	public void addDisplay (Integer key, HashMap<String, Object> value) {
 		display.put(key, value);
 	}
-
+	
+	public void clearDisplay () {
+		display.clear();
+	}
+	
 	public void deleteDisplay (Integer key) {
 		display.remove (key);
 	}
@@ -151,7 +198,7 @@ public class Member extends Application {
 	}
 	
 	public String getUsername () {
-		return this.nickname;
+		return this.email;
 	}
 
 	public String getNickname () {
@@ -198,12 +245,29 @@ public class Member extends Application {
 		userPlaces.add(new Place(n, s, c, this.ID));
 	}
 	
+	public void addPlace(String n, String s, String c, String la, String ln){
+		userPlaces.add(new Place(n, s, c, this.ID, la, ln));
+	}
+	
 	public void addPlace(Place p){
-		//userPlaces.add(new Place(n, s, c, this.ID));
 		userPlaces.add(p);
 	}
 	
 	public void clearPlaces(){
 		userPlaces.clear();
+	}
+	
+	public void addShape(com.google.android.gms.maps.model.Circle c){
+		shapes.add(c);
+	}
+	
+	public void clearShape(){
+		for (com.google.android.gms.maps.model.Circle c : shapes){
+			if (c != null){
+				c.remove();
+				c = null;
+			}
+			shapes.remove(c);
+		}
 	}
 };
