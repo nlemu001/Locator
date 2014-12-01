@@ -210,6 +210,14 @@
         	android:theme="@style/Theme.CustomDialog"
         	android:windowSoftInputMode="stateHidden" >
     	</activity>
+    	
+    	<activity
+        	android:name="com.taxi.parseRemoveMemberFromCircle"
+        	android:parentActivityName="com.taxi.CirclesActivity" >
+        	<meta-data
+            	android:name="android.support.PARENT_ACTIVITY"
+            	android:value="com.taxi.CirclesActivity" />
+    	</activity>
         
     	<activity
         android:name="com.taxi.MessageSendActivity"
