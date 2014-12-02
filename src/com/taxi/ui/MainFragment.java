@@ -68,65 +68,77 @@ public class MainFragment extends Fragment implements OnClickListener
 	private GoogleMap mMap;
 	private Context context;
 	private Member currentMember;
-	private Double mLat = 0.0;
-	private Double mLng = 0.0;
 	private boolean contactsDisplay;
 	private boolean placesDisplay;
-	
-	
+	HashMap<Integer, Marker> markers = new HashMap<Integer, Marker>();
+
 	@SuppressWarnings("deprecation")
-	@SuppressLint("InflateParams") @Override
+	@SuppressLint("InflateParams") 
+	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 		View v = inflater.inflate(R.layout.main_container, null);
 		context = v.getContext ();
-		
+
 		try {
 			initMap(v, savedInstanceState);
 		} catch (GooglePlayServicesNotAvailableException e) {
 			e.printStackTrace ();
 		}
 		currentMember = ((Member) getActivity().getApplication());
-		
+
 		try {
-        	new GetDisplayDataTask ().execute ().get ();
+			new GetDisplayDataTask ().execute ().get ();
 			new GetPlacesDataTask (currentMember.getID()).execute ().get ();
 			new CalculateLocationTask().execute().get();
-        } catch (Exception e) {
-        	Log.d("error", e.toString());
-        }
+		} catch (Exception e) {
+			Log.d("error", e.toString());
+		}
 		contactsDisplay = false;
 		placesDisplay = true;
 		PushService.setDefaultPushCallback(this.getActivity(), MainActivity.class);
 		ParsePush.subscribeInBackground(currentMember.getNickname());
-		
+
 		initButtons (v);
-		
+
 		return v;
 	}
-	
+
 	public void callAsynchronousTask() {
-	    final Handler handler = new Handler();
-	    Timer timer = new Timer();
-	    TimerTask doAsynchronousTask = new TimerTask() {       
-	        @Override
-	        public void run() {
-	            handler.post(new Runnable() {
-	                public void run() { 
-	                	Log.d("test >.<", "run!!");
-	                    try {
-	                    	new GetDisplayDataTask ().execute ().get ();
-	            			new GetPlacesDataTask (currentMember.getID()).execute ().get ();
-	            			new CalculateLocationTask().execute().get();
-	                    } catch (Exception e) {
-	                    	Log.d("error", e.toString());
-	                    }
-	                }
-	            });
-	        }
-	    };
-	    timer.schedule(doAsynchronousTask, 0, 10000); 
+		final Handler handler = new Handler();
+		Timer timer = new Timer();
+		TimerTask doAsynchronousTask = new TimerTask() {       
+			@Override
+			public void run() {
+				handler.post(new Runnable() {
+					public void run() { 
+						try {
+							new GetDisplayDataTask ().execute ().get ();
+							new CalculateLocationTask().execute().get();
+						} catch (Exception e) {
+							Log.d("error", e.toString());
+						}
+					}
+				});
+			}
+		};
+		timer.schedule(doAsynchronousTask, 0, 15000); 
 	}
 
+	public void displayContactsTask() {
+		final Handler handler = new Handler();
+		Timer timer = new Timer();
+		TimerTask doAsynchronousTask = new TimerTask() {       
+			@Override
+			public void run() {
+				handler.post(new Runnable() {
+					public void run() { 
+						displayAll();
+					}
+				});
+			}
+		};
+		timer.schedule(doAsynchronousTask, 0, 10000); 
+	}
 	
 	private void initButtons(View v) {
 		View b = v.findViewById(R.id.btnCheckin);
@@ -155,10 +167,8 @@ public class MainFragment extends Fragment implements OnClickListener
 		Integer uid = id;
 		HashMap<String, Object> map = currentMember.getDisplay (id);
 		if (id.equals (currentMember.getID ())){
-			latitude =  Double.valueOf((String) map.get ("lat"));
-			longitude = Double.valueOf((String) map.get ("lng"));
-			mLat = latitude;
-			mLng = longitude;
+			latitude =  currentMember.getLat();
+			longitude = currentMember.getLng();
 			nname = currentMember.getNickname();
 		} else if (currentMember.inDisplay (id)) {
 			nname = (String) map.get ("nickname");
@@ -187,8 +197,11 @@ public class MainFragment extends Fragment implements OnClickListener
 		}else {
 			options.icon (BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW));
 		}
-
-		mMap.addMarker (options);
+		if(markers.containsKey(uid)){
+			markers.get(uid).remove();
+		}
+		markers.put(uid, mMap.addMarker (options));
+		
 		mMap.setOnInfoWindowClickListener (new OnInfoWindowClickListener () {
 			@Override
 			public void onInfoWindowClick (Marker m) {
@@ -208,8 +221,6 @@ public class MainFragment extends Fragment implements OnClickListener
 		map.put ("nickname", nname);
 
 		currentMember.addDisplay (uid, map);
-
-		mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (latlng, 18));
 	}
 
 	private void loadMarkers() {
@@ -309,17 +320,25 @@ public class MainFragment extends Fragment implements OnClickListener
 		super.onResume();
 		mMapView.onResume();
 		mMap = mMapView.getMap();
+		contactsDisplay = false;
+		placesDisplay = true;
 		callAsynchronousTask();
+		displayContactsTask();
 		if (mMap != null) {
 			mMap.setInfoWindowAdapter (new CustomInfoWindowAdapter ());
-
 			mMap.clear();
-			currentMember.userNN = currentMember.getNickname();
 			try {
 				String user = currentMember.IDfromNickname(currentMember.userNN);
+				currentMember.userNN = "";
 				setupMapMarkers (Integer.valueOf(user));
+				HashMap<String, Object> map = currentMember.getDisplay(Integer.valueOf(user));
+				Double la = Double.valueOf((String) map.get("lat"));
+				Double ln = Double.valueOf((String) map.get("lng"));
+				mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (new LatLng(la, ln), 18));
 			}catch (IOException e) {}
-			drawPlaces();
+			if(placesDisplay){
+				drawPlaces();
+			}
 		}
 	}
 
@@ -349,48 +368,47 @@ public class MainFragment extends Fragment implements OnClickListener
 		mMapView.onSaveInstanceState(outState);
 	}
 
+	private void displayAll(){
+		if(!contactsDisplay){
+			try {
+				String user = currentMember.IDfromNickname(currentMember.userNN);
+				setupMapMarkers (Integer.valueOf(user));
+			} catch(Exception e){}
+		}else{
+			loadMarkers();
+		}
+		if(placesDisplay){
+			drawPlaces();
+		}
+	}
+
+	private void displayUSR(){
+		try {
+			String user = currentMember.IDfromNickname(currentMember.userNN);
+			setupMapMarkers (Integer.valueOf(user));
+		} catch(Exception e){}
+	}
+
+	
 	@Override
 	public void onClick(View v) {
 		if (v.getId() == R.id.btnPlaces) {
-			if(placesDisplay){
-				placesDisplay = false;
-				mMap.clear();
-				if(contactsDisplay){
-					loadMarkers();
-				}else{
-					try {
-						String user = currentMember.IDfromNickname(currentMember.userNN);
-						setupMapMarkers (Integer.valueOf(user));
-					} catch(Exception e){}
-				}
-			}else{
-				placesDisplay = true;
-				drawPlaces();
-			}
-			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (new LatLng(mLat, mLng), 18));
+			placesDisplay = !placesDisplay;
+			displayAll();
+			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (
+					new LatLng(currentMember.getLat(), currentMember.getLng()), 18));
 		}
 		
 		else if (v.getId() == R.id.btnLoc) {
-			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (new LatLng(mLat, mLng), 20));
+			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (
+					new LatLng(currentMember.getLat(), currentMember.getLng()), 20));
 		}
 		
 		else if (v.getId() == R.id.btnCheckin) {
-			if(contactsDisplay){
-				contactsDisplay = false;
-				mMap.clear();
-				try {
-					String user = currentMember.IDfromNickname(currentMember.userNN);
-					setupMapMarkers (Integer.valueOf(user));
-				} catch(Exception e){}
-				if(placesDisplay){
-					drawPlaces();
-				}
-
-			}else{
-				contactsDisplay = true;
-				loadMarkers();
-			}
-			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (new LatLng(mLat, mLng), 18));
+			contactsDisplay = !contactsDisplay;
+			displayAll();
+			mMap.animateCamera (CameraUpdateFactory.newLatLngZoom (
+					new LatLng(currentMember.getLat(), currentMember.getLng()), 18));
 		}
 		
 	}
@@ -412,14 +430,17 @@ public class MainFragment extends Fragment implements OnClickListener
 
 		@Override
 		protected String doInBackground (String... params) {
-			ParseQuery<ParseObject> inner = ParseQuery.getQuery("circles");
-            inner.whereEqualTo("adminID", currentMember.getID());
-            inner.whereEqualTo("shareLocation", 0);
-        	ParseQuery<ParseObject> outter = ParseQuery.getQuery("users");
-        	outter.whereMatchesKeyInQuery("uid", "membersID", inner);
+			ParseQuery<ParseObject> X = ParseQuery.getQuery("circles");
+            X.whereEqualTo("membersID", currentMember.getID());
+            ParseQuery<ParseObject> Y = ParseQuery.getQuery("circles");
+            Y.whereMatchesKeyInQuery("cname", "cname", X);
+            Y.whereMatchesKeyInQuery("adminID", "adminID", X);
+            Y.whereEqualTo("shareLocation", 0);
+            ParseQuery<ParseObject> U = ParseQuery.getQuery("users");
+        	U.whereMatchesKeyInQuery("uid", "membersID", Y);
         	List<ParseObject> result = null;
         	try {
-                result = outter.find();
+                result = U.find();
             } catch (Exception e1) {
                 e1.printStackTrace();
             }
@@ -432,6 +453,11 @@ public class MainFragment extends Fragment implements OnClickListener
         			String nname = o.getString ("nickname");
         			String lat = o.getString ("latitude");
         			String lng = o.getString ("longitude");
+        			if (currentMember.setLoc() && id.equals(currentMember.getID())){
+        				currentMember.toggleSet();
+        				currentMember.setLat(Double.valueOf(lat));
+        				currentMember.setLng(Double.valueOf(lng));
+        			}
         			map.put ("uid", id);
         			map.put ("lat", lat);
         			map.put ("lng", lng);
@@ -474,7 +500,6 @@ public class MainFragment extends Fragment implements OnClickListener
 	
 	private void drawPlaces () {
 		ArrayList<Place> places = currentMember.getPlaces();
-		Log.d("PLACE", String.valueOf(places.size()));
 		Geocoder gc = new Geocoder(context);
 		if(places.size() > 0)
 			currentMember.clearShape();

@@ -146,39 +146,15 @@ public class Places extends Activity{
 			        	for (int i = 0; i < placesList.size(); i++) {
 							currentMember.addPlace(placesList.get(i).getString("name"), 
 												   placesList.get(i).getString("street"), 
-												   placesList.get(i).getString("city"));
+												   placesList.get(i).getString("city"),
+												   placesList.get(i).getString("latitude"),
+												   placesList.get(i).getString("longitude"));
 						}
 			        }
 			        adapter.notifyDataSetChanged();
 			    }
 			});
 			
-			/*
-			String url = "http://rishinaik.com/familyLocator/get_places.php";
-			ArrayList<NameValuePair> param = new ArrayList<NameValuePair> ();
-			
-			param.add (new BasicNameValuePair ("uid", UID));
-			Log.d ("GetDisplayTask", "UID = " + UID);
-			JSONObject json = jParser.makeHttpRequest (url, "POST", param);
-			Log.d ("DATA", json.toString ());
-			
-			try {
-				int success = json.getInt ("success");
-				if (success == 1) {
-					Log.d ("GetDisplayTask", "success");
-					Data = json.getJSONArray ("retval");
-					currentMember.clearPlaces();
-					for (int i = 0; i < Data.length (); i++) {
-						JSONObject data = Data.getJSONObject (i);
-						currentMember.addPlace(data.getString("name"), data.getString("street"), data.getString("city"));
-					}
-					Log.d ("GetDisplayTask", "Done");
-				} else {
-					Log.d ("GetDisplayTask", "OH NO! :(");
-				}
-			} catch (JSONException e) {
-				e.printStackTrace ();
-			}*/
 			if (progressDialog.isShowing ()) {
 				progressDialog.dismiss ();
 			}

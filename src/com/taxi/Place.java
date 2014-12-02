@@ -1,6 +1,5 @@
 package com.taxi;
 
-import android.util.Log;
 
 public class Place {
 
@@ -63,12 +62,10 @@ public class Place {
 	}
 	
 	public Double getLat(){
-		Log.d("PLACE--lat", lat);
 		return Double.valueOf(lat);
 	}
 	
 	public Double getLng(){
-		Log.d("PLACE--lng", lng);
 		return Double.valueOf(lng);
 	}
 	

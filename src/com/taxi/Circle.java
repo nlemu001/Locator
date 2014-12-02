@@ -3,8 +3,6 @@ package com.taxi;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import android.util.Log;
-
 public class Circle {
 	private String cname;
 	private Integer adminID;
@@ -62,7 +60,6 @@ public class Circle {
 			this.members.add(member);
 			this.nnames.add(nickname);
 			this.all_users.add(map);
-			Log.d("Adding", nickname + " to " + this.cname);
 		}
 	}
 	

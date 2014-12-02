@@ -3,12 +3,14 @@ package com.taxi;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import android.annotation.SuppressLint;
 import android.app.Application;
 import android.util.Log;
 
 import com.parse.Parse;
 import com.parse.PushService;
 
+@SuppressLint("UseSparseArrays") 
 public class Member extends Application {
 	public Integer ID;
 	public String nickname;
@@ -16,7 +18,9 @@ public class Member extends Application {
 	public String password;
 	public String email;
 	public String phone_num;
-
+	private Double mLat = 33.52;
+	private Double mLng = -117.82;
+	private boolean locSet = true;
 	public HashMap<Integer, HashMap<String, Object>> display = new HashMap<Integer, HashMap<String, Object>>();
 	public ArrayList <Circle> circles = new ArrayList <Circle> ();
 	private ArrayList<Place> userPlaces = new ArrayList<Place>();
@@ -48,6 +52,30 @@ public class Member extends Application {
 		this.password = password;
 		this.phone_num = phone;
 
+	}
+	
+	public boolean setLoc(){
+		return locSet;
+	}
+	
+	public void toggleSet(){
+		locSet = false;
+	}
+	
+	public Double getLat(){
+		return mLat;
+	}
+	
+	public Double getLng(){
+		return mLng;
+	}
+	
+	public void setLat(Double lat){
+		mLat = lat;
+	}
+	
+	public void setLng(Double lng){
+		mLng = lng;
 	}
 	
 	public boolean containsNotification (Integer usr, String name) {
@@ -85,11 +113,9 @@ public class Member extends Application {
 		for (Integer key : display.keySet()){
 			HashMap <String, Object> map = display.get(key);
 			if (((String) map.get("nickname")).equals(nname)) {
-				Log.d("IDfromNickname", "found!");
 				return String.valueOf((Integer) map.get ("uid"));
 			}
 		}
-		Log.d("IDfromNickname", "currentID");
 		return  String.valueOf(ID);
 	}
 	
@@ -148,7 +174,6 @@ public class Member extends Application {
 
 	public String[] getNicknameArray (int index) {
 		ArrayList <String> nnames = circles.get(index).getNicknames();
-		Log.d ("Adding - ", String.valueOf(nnames.size()));
 		return nnames.toArray (new String [0]);
 	}
 
@@ -182,8 +207,6 @@ public class Member extends Application {
 
 	public void addCircle (Circle c) {
 		circles.add(c);
-		//CircleNames.add(c.getCircleName());
-		Log.d("Circle", "adding");
 	}
 
 	public Integer getID () {
@@ -239,10 +262,6 @@ public class Member extends Application {
 	
 	public ArrayList<Place> getPlaces(){
 		return this.userPlaces;
-	}
-	
-	public void addPlace(String n, String s, String c){
-		userPlaces.add(new Place(n, s, c, this.ID));
 	}
 	
 	public void addPlace(String n, String s, String c, String la, String ln){

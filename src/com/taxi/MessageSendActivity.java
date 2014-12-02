@@ -26,10 +26,13 @@ public class MessageSendActivity extends Activity{
 	Button button;
 	Button button2;
 	Button button3;
+	//
 	String circleName = "";
+	String circleMemberNickname = "";
+	//
 	//ArrayList<String> circleNamesList = new ArrayList<String> ();
 	String messageString;
-	String messageNicknameString;;
+	String messageNicknameString;
 	Context context;
 	View focusView = null;
 	List<ParseObject> usersQueryList = null;
@@ -42,7 +45,15 @@ public class MessageSendActivity extends Activity{
 	{
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.message_send_activity);
-		
+		button3 = (Button) findViewById(R.id.button3);
+		button3.setOnClickListener(new OnClickListener() 
+		{
+			@Override
+			public void onClick(View arg0) 
+			{
+			  sendSMSMessage3();
+			}
+		});
 	    txtMessage = (EditText) findViewById(R.id.editTextSMS);
 	    messageRecipient = (EditText) findViewById(R.id.editTextSMSRecipient);
 	    currentMember = ((Member) this.getApplication());
@@ -52,52 +63,81 @@ public class MessageSendActivity extends Activity{
 	    {
 	        //messageString = extras.getString("replyID");
 	        //messageNicknameString = extras.getString("replyNickname");
-	        circleName = extras.getString("groupName");
-	        messageRecipient.setText("All members of: " + circleName);
+    		circleName = extras.getString("groupName");
+    		circleMemberNickname = extras.getString("memberName");
+    	    Log.d("Userlist", "LOOK HERE33: " + circleName);
+    	    Log.d("Userlist", "LOOK HERE32: " + circleMemberNickname);
+	    	if(!circleName.equals(" "))
+	    	{
+	        	messageRecipient.setText("All members of: " + circleName);
+	        	messageRecipient.setKeyListener(null);
+	        	addListenerOnButton(2);
+	    	}
+	    	else
+	    	{
+	    		messageRecipient.setText(circleMemberNickname);
+	        	messageRecipient.setKeyListener(null);
+	        	addListenerOnButton(1);
+	    	}
 	    }
-	    Log.d("Userlist", "LOOK HERE: ");
-		addListenerOnButton();
+	    else
+	    {
+	    	addListenerOnButton(1);
+	    }
 	}
 	
-	public void addListenerOnButton() 
+	public void addListenerOnButton(int buttonFunction) 
 	{
 		Log.d("Userlist", "LOOK HERE: ");
 		final Context context = this;
-		button = (Button) findViewById(R.id.button1);
-		button.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-				if(!txtMessage.getText().toString().matches(""))
-				{
-					sendSMSMessage();
+		if(buttonFunction == 1)
+		{
+			button = (Button) findViewById(R.id.button1);
+			button.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+					if(!txtMessage.getText().toString().matches(""))
+					{
+						txtMessage.setError(null);
+						sendSMSMessage();
+					}
+					else
+					{
+						Log.d("Userlist", "WHHHHYYYY: ");
+						txtMessage.setError(getString(R.string.error_message_is_empty));
+						focusView = txtMessage;
+						focusView.requestFocus();
+					}
 				}
-				else
-				{
-					txtMessage.setError(getString(R.string.error_message_is_empty));
-					focusView = txtMessage;
-					focusView.requestFocus();
+			});
+		}
+		else if(buttonFunction == 2)
+		{
+			button = (Button) findViewById(R.id.button1);
+			button.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+				  sendSMSMessage2();
+				  Intent GoToInbox = new Intent(context, MessageInbox.class);
+				  startActivity(GoToInbox);
 				}
-			}
-		});
-		button2 = (Button) findViewById(R.id.button2);
-		button2.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-			  sendSMSMessage2();
-			}
-		});
-		button3 = (Button) findViewById(R.id.button3);
-		button3.setOnClickListener(new OnClickListener() {
-			@Override
-			public void onClick(View arg0) {
-			  sendSMSMessage3();
-			}
-		});
- 
+			});
+		}
+		else if(buttonFunction == 3)
+		{
+			button3 = (Button) findViewById(R.id.button3);
+			button3.setOnClickListener(new OnClickListener() {
+				@Override
+				public void onClick(View arg0) {
+				  sendSMSMessage3();
+				}
+			});
+		}
+// 
 	}
 	
 	protected void sendSMSMessage() 
-	{	
+	{
 		ParseQuery<ParseObject> query = ParseQuery.getQuery("users");
 		query.whereEqualTo("nickname", messageRecipient.getText().toString());
 		query.findInBackground(new FindCallback<ParseObject>() 
@@ -111,7 +151,7 @@ public class MessageSendActivity extends Activity{
 		        else if(usersList.size() == 0)
 		        {
 		        	messageRecipient.setError(getString(R.string.error_message_user_doesnt_exist));
-					focusView = txtMessage;
+					focusView = messageRecipient;
 					focusView.requestFocus();
 		        }
 		        else
@@ -124,6 +164,9 @@ public class MessageSendActivity extends Activity{
 		    		newMessage.put("content", txtMessage.getText().toString());
 		    		newMessage.put("mID", 1);
 		    		newMessage.saveInBackground();
+		    		
+					Intent GoToInbox = new Intent(context, MessageInbox.class);
+					startActivity(GoToInbox);
 		    		
 		    	Toast toast = Toast.makeText(context, "Message Sent", Toast.LENGTH_SHORT);
 				toast.show();

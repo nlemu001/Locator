@@ -43,7 +43,6 @@ public class NewPlacePopup extends CustomActivity
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.new_place_popup);
 		context = this;
-//		Parse.initialize(this, "QjBCQwxoQdR6VtYp2tyrGvQLlf7eKEBzPjAZVcGm", "IbgUMSFPZubtrtj7rJ1wxDAce6lcUuLv4N4GCDCW");
 		
 		currentMember = ((Member) this.getApplication());
 		nUID = ((Member) this.getApplication()).ID.toString();
@@ -100,13 +99,9 @@ public class NewPlacePopup extends CustomActivity
 						new UpdatePlaceTask(lat, lng).execute().get();
 						InputMethodManager imm =(InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
 						imm.hideSoftInputFromWindow(cityET.getWindowToken(),0);
-					} catch (InterruptedException e) {
-						// TODO Auto-generated catch block
+					} catch (Exception e) {
 						e.printStackTrace();
-					} catch (ExecutionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
+					} 
 					
 				} catch (IOException e1) {
 					e1.printStackTrace();

@@ -41,4 +41,5 @@
     <string name="profile_image">profile image</string>
     <string name="nickname_str">"Nickname: "</string>
     <string name="name_">"Name: "</string>
+    <string name="about">About</string>
 </resources>

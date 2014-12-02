@@ -63,7 +63,7 @@ public class CircleMembers extends Activity
 		startActivity(new Intent(CircleMembers.this, CirclesActivity.class));
 		finish();
 	}
-	
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) 
 	{
@@ -76,7 +76,7 @@ public class CircleMembers extends Activity
 		String phoneNum = currentUser.phone_num;
 
 		//String[] nicknameList = currentUser.getNicknameArray(currentUser.circle);
-context = this;
+		context = this;
 		
 		Bundle extras = getIntent().getExtras();
 		if(extras != null)
@@ -175,9 +175,11 @@ context = this;
 				int itemPos = position;
 				currentUser.user = position;
 				String itemVal = (String) listview.getItemAtPosition(itemPos);
-				Toast.makeText(getApplicationContext(),
-						"Position: " + itemPos + " Name: " + itemVal,
-						Toast.LENGTH_SHORT).show();
+				currentUser.userNN = itemVal;
+//				Toast.makeText(getApplicationContext(),
+//						"Position: " + itemPos + " Name: " + itemVal,
+//						Toast.LENGTH_SHORT).show();
+				finish();
 
 			}
 		}); 
@@ -191,6 +193,7 @@ context = this;
 				int itemPosLongClick = pos;
 				currentUser.user = pos;
 				String itemValLongClick = (String) listview.getItemAtPosition(itemPosLongClick);
+				final String itemValLongClickMessage = (String) listview.getItemAtPosition(itemPosLongClick);
 				final String phoneNum = currentUser.getPhone(itemValLongClick);
 				String displayCallFeature = "Call " + itemValLongClick;
 				String displayMessageFeature = "Message " + itemValLongClick;
@@ -206,7 +209,6 @@ context = this;
 						//Call choice 
 						if(choice == 0)
 						{
-
 							try 
 							{
 								Intent callIntent = new Intent(Intent.ACTION_CALL);
@@ -218,6 +220,13 @@ context = this;
 								Log.e("Calling a Phone Number", "Call failed", activityException);
 							}
 
+						}
+						else if(choice == 1)
+						{
+							Intent intent = new Intent(context, MessageSendActivity.class);
+							intent.putExtra("memberName", itemValLongClickMessage);
+							intent.putExtra("groupName", " ");
+							startActivity(intent);
 						}
 					}
 				});

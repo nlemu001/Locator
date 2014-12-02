@@ -69,8 +69,6 @@ public class CreateCircle extends Activity
 		    public void done(List<ParseObject> usersList, ParseException e) 
 		    {
 		        if (e != null) {
-		        	//ERROR
-		        	Log.d("Userlist", "Error: " + e.getMessage());
 		        }
 		        else
 		        {
@@ -102,12 +100,6 @@ public class CreateCircle extends Activity
 		ParseQueryAdapter<ParseObject> mainAdapter = new ParseQueryAdapter<ParseObject>(this, factory);
 		mainAdapter.setTextKey("nickname");
 		
-		//mainAdapter = new ParseQueryAdapter<ParseObject>(this, "users");
-		//mainAdapter.setTextKey("nickname");
-		//mainAdapter.setImageKey("image");
-		
-		//adminAdapter = new AdapterAllUsersButAdmin(this);
-		//listview.setAdapter(mainAdapter);
 		listview.setAdapter(mainAdapter);
 		
 		String cuid = currentMember.getID().toString();
@@ -117,13 +109,10 @@ public class CreateCircle extends Activity
 			@Override
 			public void onItemClick(AdapterView<?> l, View v, int pos, long id)
 			{
-				if(selectedNames.indexOf(keys.get(pos)) == -1) //If it is not found in the list then add and select
+				if(selectedNames.indexOf(keys.get(pos)) == -1) 
 				{
 					listview.setItemChecked(pos, true);
-					selectedNames.add(keys.get(pos));//This is the issue
-					Toast toast = Toast.makeText(context, "Adding " + 
-							values.get(pos) + " to " + circleName.getText().toString(), Toast.LENGTH_SHORT);
-					toast.show();
+					selectedNames.add(keys.get(pos));
 				}
 				else //found in list already so remove it
 				{
@@ -144,12 +133,7 @@ public class CreateCircle extends Activity
 		{
 			@Override
 			public void onClick(View v) {
-				for(int j = 0; j < selectedNames.size(); j++)
-					Log.d("selected Names", selectedNames.get(j));
-				
-				Toast.makeText(getApplicationContext(),  circleName.getText().toString() + " Circle Created", Toast.LENGTH_LONG).show();
 				addCircleToDatabase();
-				
 				Intent createNewAccountIntent = new Intent(CreateCircle.this, CirclesActivity.class);
 				startActivity(createNewAccountIntent);
 				finish();

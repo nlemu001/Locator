@@ -140,11 +140,12 @@ LocationListener {
 		} 
 		final ArrayList<Feed> al = new ArrayList<Feed>();
 		al.add(new Feed("View Profile", null, R.drawable.profile));
-		al.add(new Feed("Send Message", null, R.drawable.ic_chat));
+		al.add(new Feed("View Inbox", null, R.drawable.ic_chat));
 		al.add(new Feed("View Circles", null, R.drawable.ic_left5));
 		al.add(new Feed("Favorite Places", null, R.drawable.ic_left4));
 		al.add(new Feed("Sign Out", null, R.drawable.ic_left6));
-
+		al.add(new Feed("About", null, R.drawable.ic_left7));
+		
 		final LeftNavAdapter adp = new LeftNavAdapter(this, al);
 		drawerLeft.setAdapter(adp);
 		final Context context = this;
@@ -164,7 +165,7 @@ LocationListener {
 					startActivity(i);
 				}
 				else if(arg2 == 2) {
-					Intent i = new Intent(context, MessageSendActivity.class);
+					Intent i = new Intent(context, MessageInbox.class);
 					startActivity(i);
 				}
 				else if(arg2 == 3) {
@@ -184,6 +185,10 @@ LocationListener {
 					Intent i = new Intent(context, UserLogin.class);
 					startActivity(i);
 					finish();
+				}
+				else if(arg2 == 6) {
+					Intent i = new Intent(context, About.class);
+					startActivity(i);
 				}
 				drawerLayout.closeDrawer (drawerLeft);
 			}
@@ -352,7 +357,6 @@ LocationListener {
 
 	@Override
 	public void onDisconnected() {
-		Toast.makeText(this, "Disconnected. Please re-connect.",Toast.LENGTH_SHORT).show();
 	}
 
 	@Override
@@ -364,28 +368,25 @@ LocationListener {
 				e.printStackTrace();
 			} 
 		}else {
-			Toast.makeText(this, "Failed to connect to connection",Toast.LENGTH_SHORT).show();
 		} 
 	}
 
 	private void requestLocationUpdates() {
 		LocationRequest request = LocationRequest.create();
 		request.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-		request.setInterval(10000);
-		request.setFastestInterval(8000);
+		request.setInterval(7000);
+		request.setFastestInterval(5000);
 		mLocationClient.requestLocationUpdates(request, this);
 	}
 
 	@Override
 	protected void onStart() {
 		super.onStart();
-		Toast.makeText(this, "Starting Location Services.",Toast.LENGTH_SHORT).show();
 		mLocationClient.connect();
 	}
 
 	@Override
 	protected void onStop() {
-		Toast.makeText(this, "Stopping Location Services.",Toast.LENGTH_SHORT).show();
 		if (mLocationClient.isConnected()) {
 			mLocationClient.removeLocationUpdates(this);
 		}
@@ -395,20 +396,19 @@ LocationListener {
 
 	@Override
 	public void onLocationChanged(Location loc) {
-		Toast.makeText(this, "Location: " + loc.getLatitude() + "," + loc.getLongitude(),
-				Toast.LENGTH_SHORT).show();
 		try {
 			new UpdateLocationTask (UID, loc.getLatitude(), loc.getLongitude()).execute ().get ();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		currentMember.setLat(loc.getLatitude());
+		currentMember.setLng(loc.getLongitude());
 		currentMember.updateDisplay(UID, loc.getLatitude(), loc.getLongitude());
 	}
 
 	@Override
 	protected void onPause() {
 		super.onPause();
-		Toast.makeText(this, "Pausing Location Services.",Toast.LENGTH_SHORT).show();
 		mLocationClient.removeLocationUpdates(this);
 	}
 

@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
@@ -38,6 +39,7 @@ public class UserLogin extends Activity implements OnClickListener
 
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_user_login);
+		getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
 
 		signIn = (Button) findViewById(R.id.signIN);
 		newAccount = (Button) findViewById(R.id.newACCOUNT);
@@ -88,6 +90,7 @@ public class UserLogin extends Activity implements OnClickListener
 
 		if(usernameEntry.contains("@") && !usernameEntry.contains(" ") && (usernameEntry.contains(".com") || usernameEntry.contains(".edu")))//also .net, .edu, .org
 		{
+			usernameField.setError(null);
 			return true;
 		}
 		else
@@ -110,6 +113,7 @@ public class UserLogin extends Activity implements OnClickListener
 		}
 		else
 		{
+			passwordField.setError(null);
 			return true;
 		}
 	}

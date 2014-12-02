@@ -175,6 +175,7 @@ public class CirclesActivity extends Activity
 						{
 							Intent intent = new Intent(context, MessageSendActivity.class);
 							intent.putExtra("groupName", currentCircle.getCircleName());
+							intent.putExtra("memberName", " ");
 							startActivity(intent);
 							//Toast.makeText(getApplicationContext(), adminChoices[choice]+": " + currentCircle.getCircleName(), Toast.LENGTH_SHORT).show();
 						}
